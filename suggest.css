@@ -1,0 +1,272 @@
+/* ==== General Page Layout ==== */
+body {
+  background-color: #121212;
+  color: #eee;
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==== Return Link ==== */
+.return-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  color: #00cc66;
+  font-size: 0.9rem;
+  text-decoration: none;
+  background: rgba(0, 204, 102, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.return-link:hover {
+  background: rgba(0, 204, 102, 0.25);
+}
+
+/* ==== Suggest Page ==== */
+.suggest-page {
+  max-width: 900px;
+  margin: 4rem auto 2rem;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+.suggest-page h2 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.suggest-page p {
+  color: #aaa;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Shorter tag input */
+#tagNameInput {
+  width: 40%;
+  max-width: 260px;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #1c1c1c;
+  color: #fff;
+  font-size: 1rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+#tagNameInput:focus {
+  outline: none;
+  border-color: #00cc66;
+  background: #1a1a1a;
+}
+
+#tagNameInput.filled {
+  border-color: #00cc66;
+  background-color: rgba(0, 204, 102, 0.1);
+}
+
+/* Top navigation and tag banner */
+#returnLink {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  color: #ccc;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+  z-index: 10;
+}
+#returnLink:hover {
+  color: #fff;
+}
+
+#tagBanner {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(68, 68, 68, 0.9);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  z-index: 9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+#tagBanner.hidden {
+  display: none;
+}
+
+#changeTagBtn {
+  background: #333;
+  border: none;
+  color: #ddd;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s, color 0.2s;
+}
+#changeTagBtn:hover {
+  background: #555;
+  color: #fff;
+}
+
+/* Make input shorter */
+#tagNameInput {
+  width: 220px;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
+}
+#tagNameInput.filled {
+  border-color: #00cc66;
+  background: #1c1c1c;
+}
+
+
+/* ==== Search Bar ==== */
+.search-container {
+  margin-top: 1.2rem;
+}
+
+#searchStreams {
+  width: 60%;
+  max-width: 380px;
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+#searchStreams:focus {
+  outline: none;
+  border-color: #00cc66;
+}
+
+/* ==== Stream Grid ==== */
+#streamList {
+  margin-top: 1.8rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* ==== Stream Card ==== */
+.stream-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 1px solid #444;
+  padding: 0.8rem;
+  border-radius: 8px;
+  background: #1c1c1c;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.stream-item:hover {
+  transform: translateY(-2px);
+}
+
+.stream-item img {
+  width: 100%;
+  max-width: 240px;
+  height: 135px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+}
+
+.stream-item span {
+  color: #ddd;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+/* ==== Yes/No Buttons ==== */
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.btn-yes,
+.btn-no {
+  font-size: 1.4rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: #999;
+  transition: transform 0.1s, color 0.2s;
+}
+
+.btn-yes:hover {
+  color: #00cc66;
+}
+
+.btn-no:hover {
+  color: #cc3333;
+}
+
+.btn-yes.selected {
+  color: #00cc66;
+  transform: scale(1.2);
+}
+
+.btn-no.selected {
+  color: #cc3333;
+  transform: scale(1.2);
+}
+
+/* ==== Visual Feedback for Selection ==== */
+.stream-item.yes {
+  background-color: rgba(0, 204, 102, 0.15);
+  border-color: #00cc66;
+}
+
+.stream-item.no {
+  background-color: rgba(204, 51, 51, 0.15);
+  border-color: #cc3333;
+}
+
+/* ==== Submit Button ==== */
+#submitTag {
+  margin-top: 2rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  background: #333;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+#submitTag:hover:not(:disabled) {
+  background-color: #00cc66;
+  transform: translateY(-2px);
+}
+
+#submitTag:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Suggest Tag</title>
+  <link rel="stylesheet" href="suggest.css" />
+</head>
+<body>
+<a href="index.html" id="returnLink">← Return to Cuudex</a>
+
+<div id="tagBanner" class="hidden">
+  <span id="tagBannerText"></span>
+  <button id="changeTagBtn">Change tag</button>
+</div>
+
+  <main class="suggest-page">
+    <h2>Suggest a Tag</h2>
+
+    <p>
+      Thank you for your input — these filters help cater Cuu to others! 
+      Your suggestion will be manually screened to prevent trolling. 
+      Please double-check your tag spelling before submitting.
+    </p>
+
+    <input id="tagNameInput" type="text" placeholder="Enter new tag name..." />
+
+    <div class="search-container">
+      <input id="searchStreams" type="text" placeholder="Search streams by title..." />
+    </div>
+
+    <div id="streamList" class="stream-list"></div>
+
+    <button id="submitTag" disabled>Submit Tag</button>
+  </main>
+
+  <script src="script.js"></script>
+  <script src="suggest.js"></script>
+</body>
+</html>

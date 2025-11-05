@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cuudex</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="channel-header">
+    <a id="youtube-link" href="#" target="_blank" rel="noopener">
+      <img id="channel-thumbnail" src="" alt="Channel Thumbnail" />
+    </a>
+
+    <div class="channel-info">
+      <div class="social-icons">
+        <a href="https://twitter.com/,,," target="_blank" rel="noopener">
+          <img src="twitter_logo.png" alt="Twitter" class="social-icon" />
+        </a>
+        <a href="https://,,,.blogspot.com/" target="_blank" rel="noopener">
+          <img src="blogspot_logo.png" alt="Blogspot" class="social-icon" />
+        </a>
+      </div>
+
+      <h1 id="channel-title">
+        <a href="#" id="channel-link" target="_blank" rel="noopener">Channel Name</a>
+      </h1>
+    </div>
+  </header>
+
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="Search streams..." />
+
+    <button id="suggestTagBtn" class="suggest-btn">Suggest Tag</button>
+
+    <div class="tag-filters">
+      <div id="tag-filters" class="tag-filters"></div>
+    </div>
+
+    <div class="slider-group">
+      <label>Duration:</label>
+      <div class="slider-row">
+        <div class="slider-container" id="sliderContainer">
+          <input type="range" id="minDuration" />
+          <input type="range" id="maxDuration" />
+          <div class="range-fill" id="rangeFill"></div>
+        </div>
+        <div class="duration-values">
+          <span id="minLabel">0</span> — <span id="maxLabel">0</span> min
+        </div>
+      </div>
+    </div>
+
+    <select id="sortOrder">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+    </select>
+  </div>
+
+  <main id="video-grid"></main>
+
+  <!-- Embedded CSV tag data -->
+  <script id="meta-csv" type="text/csv">
+stream_link, zatsu_start, One-Shot, Existential, Funny, Horror, Visual Novel, Interactive, Lore, Roleplay, Collab, BL/GL, Story-Driven
+https://www.youtube.com/watch?v=eTU6SNI9GhE, 1:29,,,,,,,1,,,,,
+https://www.youtube.com/watch?v=Uy-lNGkXskk, 1:58,,,,,,,1,,,,,
+https://www.youtube.com/watch?v=sphxrATM7vY, 19:27,,,,,,,1,,,,,
+https://www.youtube.com/watch?v=ZCHmKRc_WgI, 1:03:55,,,,,,,1,1,,,,
+https://www.youtube.com/watch?v=wcbUTC8wCZs, 0,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=6CPOlvuTgGI, 6:16:23,,,1,,1,,,,,,,
+https://www.youtube.com/watch?v=87GnQLQ3XII, 4:00:29,1,1,,,,,,,,,1,
+https://www.youtube.com/watch?v=6-vGuOxJAxo, 3:24:56,,,1,,,,,,,,1,
+https://www.youtube.com/watch?v=BMh6L9LOrlI, 4:31:02,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=RoOed38WEwY, 0,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=Z0MrmgAFwRc, 8:38:05,,,1,,1,,,,,,,
+https://www.youtube.com/watch?v=D1aD_msnWJk, 4:28:50,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=d7Z3RxsdjBc, 0,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=_xp2WxoSeTs, 5:49:41,,1,,,,,,,,,1,
+https://www.youtube.com/watch?v=iK6Oy8s7yxk, 2:50:46,1,1,,,,,,,,,1,
+https://www.youtube.com/watch?v=79h4Kgp4AZ0, 3:26:34,,,1,,,,,,,,1,
+https://www.youtube.com/watch?v=1nfIDZsCiL8, 0,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=DLxNH0JDS0Q, 8:30:57,,,,1,,,,,,,1,
+https://www.youtube.com/watch?v=bbpaZjnN15M, 7:27:12,,1,,,,,,,,,1,
+https://www.youtube.com/watch?v=QvNMOfE_I4E, 3:28:00,,,1,,,,,,,,1,
+https://www.youtube.com/watch?v=EgDKIKEmwyc, 5:14:14,,,,,,,,1,10,,,
+https://www.youtube.com/watch?v=-xH58LTrV_k, 0,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=NfdxUzUWMeo, 4:20:47,,,,,1,,,,,,1,
+https://www.youtube.com/watch?v=Y9H7gURSK9w, 5:48:01,,,,1,,,,,,,1,
+https://www.youtube.com/watch?v=rIjHhVr8w-Q, 3:20:51,,,1,,,,,,,,1,
+https://www.youtube.com/watch?v=m7zpIfO1ETg, 0,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=LucADfkU7DU, 5:05:56,,,,,1,,,,,,1,
+https://www.youtube.com/watch?v=pO41I7m3UCc, 3:10:32,1,,,1,1,,,,,1,1,
+https://www.youtube.com/watch?v=i3-fZZiRRag, 3:54:52,,,,1,,,,,,,1,
+https://www.youtube.com/watch?v=OI7FVDQfXHM, 3:34:35,,,,1,,,,,2,,
+https://www.youtube.com/watch?v=uy0Wj_nOgKY, 2:01:59,,,,1,,,,,,,1,
+https://www.youtube.com/watch?v=-8nSSouEKNk, 0,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=8aKAZOxUSlc, 4:37:32,,,,,1,,,,,,1,
+https://www.youtube.com/watch?v=ooDdTI6BaZw, 5:20:22,,,,1,,,,,,,1,
+https://www.youtube.com/watch?v=8JP8ib36MoE, 5:39:25,1,,,1,1,,,,,1,1,
+https://www.youtube.com/watch?v=3pJyyhdEQR4, 5:37:48,,,,1,,,,,,,1,
+https://www.youtube.com/watch?v=TVhTAnIV5_M, 0,,,,,,1,,,,,,
+https://www.youtube.com/watch?v=fy9R5mbpx4g, 4:26:23,,,,,1,,,,,,1,
+https://www.youtube.com/watch?v=e082PDwOnX8, 6:56:27,1,,,1,,,,,,,1,
+https://www.youtube.com/watch?v=etyQnriXXmA, 2:03:30,,,1,,,1,,1,,,,
+https://www.youtube.com/watch?v=2r5RinTHXQo, 5:51:20,,,,1,,,,,,,1,
+</script>
+<script src="script.js"></script>
+</body>
+</html>
