@@ -14,6 +14,29 @@ function parseDurationToMinutes(iso) {
   return h * 60 + m + s / 60;
 }
 
+function parseZatsuToMinutes(value) {
+  if (!value) return 0;
+  const parts = value.split(":").map((n) => parseFloat(n));
+  if (parts.length === 3) {
+    const [h, m, s] = parts;
+    return h * 60 + m + s / 60;
+  } else if (parts.length === 2) {
+    const [m, s] = parts;
+    return m + s / 60;
+  } else if (parts.length === 1 && !isNaN(parts[0])) {
+    return parts[0];
+  }
+  return 0;
+}
+
+// still utils, just slider minutes
+function formatMinutesShort(mins) {
+  const h = Math.floor(mins / 60);
+  const m = Math.round(mins % 60);
+  return h > 0 ? `${h}:${m.toString().padStart(2, "0")}` : `${m}`;
+}
+
+
 function formatMinutesToHM(mins) {
   const h = Math.floor(mins / 60);
   const m = Math.round(mins % 60);
@@ -106,21 +129,30 @@ function loadStreamTags() {
 
   const csvData = csvDataEl.textContent.trim();
   const lines = csvData.split("\n").filter((line) => line.trim());
-  const headers = lines[0].split(",");
+  const headers = lines[0].split(",").map((h) => h.trim());
   const rows = lines.slice(1);
 
   const tagMap = {};
+
   for (const row of rows) {
     const cols = row.split(",");
     const record = {};
     headers.forEach((h, i) => {
-      record[h.trim()] = (cols[i] || "").trim();
+      record[h] = (cols[i] || "").trim();
     });
+
     const id = extractVideoId(record.stream_link);
-    if (id) tagMap[id] = record;
+    if (!id) continue;
+
+    // Parse zatsu_start into minutes
+    const zatsuStartMinutes = parseZatsuToMinutes(record.zatsu_start);
+
+    tagMap[id] = { ...record, zatsuStartMinutes };
   }
+
   return tagMap;
 }
+
 
 function extractVideoId(url) {
   if (!url) return null;
@@ -143,7 +175,7 @@ function createTagButtons(tagNames) {
     tagStates[tag] = "none";
     const btn = document.createElement("button");
     btn.className = "tag-btn";
-    btn.textContent = tag;
+    btn.innerHTML = `<span>${tag}</span>`;
     btn.addEventListener("click", () => cycleTagState(tag, btn));
     updateTagButtonStyle(btn, "none");
     container.appendChild(btn);
@@ -169,26 +201,30 @@ function updateTagButtonStyle(btn, state) {
 }
 
 
-// ==== DURATION SLIDER LOGIC ====
-let minInput, maxInput, rangeFill, minLabelEl, maxLabelEl;
-let sliderMin = 0;
-let sliderMax = 600;
-const STEP = 1;
+// ==== SLIDER LOGIC (GENERIC) ====
+function setupDualSlider(options) {
+  const {
+    minId, maxId, fillId,
+    minLabelId, maxLabelId,
+    containerId,
+    realMax,
+    onChange
+  } = options;
 
-function setupDualSlider(realMax) {
-  minInput = document.getElementById("minDuration");
-  maxInput = document.getElementById("maxDuration");
-  rangeFill = document.getElementById("rangeFill");
-  minLabelEl = document.getElementById("minLabel");
-  maxLabelEl = document.getElementById("maxLabel");
+  const minInput = document.getElementById(minId);
+  const maxInput = document.getElementById(maxId);
+  const rangeFill = document.getElementById(fillId);
+  const minLabelEl = document.getElementById(minLabelId);
+  const maxLabelEl = document.getElementById(maxLabelId);
 
   if (!minInput || !maxInput) {
-    console.warn("[Slider] Elements not found — skipping setup.");
+    console.warn(`[Slider ${containerId}] Elements not found — skipping.`);
     return;
   }
 
-  sliderMin = 0;
-  sliderMax = Math.max(1, Math.round(realMax));
+  const sliderMin = 0;
+  const sliderMax = Math.max(1, Math.round(realMax));
+  const STEP = 1;
 
   [minInput, maxInput].forEach((input) => {
     input.min = sliderMin;
@@ -198,9 +234,25 @@ function setupDualSlider(realMax) {
 
   minInput.value = sliderMin;
   maxInput.value = sliderMax;
-  updateFill(sliderMin, sliderMax);
-  minLabelEl.textContent = sliderMin;
-  maxLabelEl.textContent = sliderMax;
+
+function updateFill(minV, maxV) {
+  const cont = document.getElementById(containerId);
+  if (!cont || !rangeFill) return;
+
+  // ✅ Always read the *current* slider range dynamically
+  const sliderMin = parseFloat(minInput.min);
+  const sliderMax = parseFloat(maxInput.max);
+
+  // Guard: avoid divide-by-zero if something odd happens
+  const range = Math.max(1, sliderMax - sliderMin);
+
+  const percentMin = ((minV - sliderMin) / range) * 100;
+  const percentMax = ((maxV - sliderMin) / range) * 100;
+
+  rangeFill.style.left = percentMin + "%";
+  rangeFill.style.width = Math.max(0, percentMax - percentMin) + "%";
+}
+
 
   const handleInput = () => {
     let minVal = parseInt(minInput.value);
@@ -211,26 +263,27 @@ function setupDualSlider(realMax) {
     minInput.value = minVal;
     maxInput.value = maxVal;
     updateFill(minVal, maxVal);
-    minLabelEl.textContent = minVal;
-    maxLabelEl.textContent = maxVal;
-    filterAndSortStreams();
+
+    // ✅ Format labels nicely
+    if (minLabelEl) minLabelEl.textContent = formatMinutesShort(minVal);
+    if (maxLabelEl) maxLabelEl.textContent = formatMinutesShort(maxVal);
+
+    if (onChange) onChange(minVal, maxVal);
   };
 
+  // Attach events
   minInput.addEventListener("input", handleInput);
   maxInput.addEventListener("input", handleInput);
   window.addEventListener("resize", () =>
     updateFill(parseInt(minInput.value), parseInt(maxInput.value))
   );
+
+  // Initialize
+  handleInput();
 }
 
-function updateFill(minV, maxV) {
-  const cont = document.getElementById("sliderContainer");
-  if (!cont || !rangeFill) return;
-  const percentMin = ((minV - sliderMin) / (sliderMax - sliderMin)) * 100;
-  const percentMax = ((maxV - sliderMin) / (sliderMax - sliderMin)) * 100;
-  rangeFill.style.left = percentMin + "%";
-  rangeFill.style.width = percentMax - percentMin + "%";
-}
+
+
 
 
 // ==== STREAM DISPLAY & FILTERING ====
@@ -245,17 +298,33 @@ function displayStreams(streams) {
     return;
   }
 
-  grid.innerHTML = streams.map((s) => `
-    <div class="video-card">
-      <a href="https://youtu.be/${s.id}" target="_blank" class="thumb-link">
-        <img src="${s.thumbnail}" alt="${escapeHtml(s.title)}" loading="lazy" />
-      </a>
-      <div class="video-info">
-        <h3>${escapeHtml(s.title)}</h3>
-        <p>${formatMinutesToHM(s.durationMinutes)} — ${new Date(s.date).toLocaleDateString()}</p>
+grid.innerHTML = streams.map((s) => {
+const isTagged = s.tags && Object.keys(s.tags).some(k => k && k !== "stream_link" && k !== "zatsu_start");
+const untaggedLabel = !isTagged ? `<span class="untagged-label">Untagged</span>` : "";
+
+// ✅ Proper date formatting: "July 4 '25"
+const d = new Date(s.date);
+const options = { month: 'long', day: 'numeric' };
+const formattedDate = d.toLocaleDateString('en-GB', options) + " '" + String(d.getFullYear()).slice(-2);
+
+return `
+  <div class="video-card">
+    <a href="https://youtu.be/${s.id}" target="_blank" class="thumb-link">
+      <img src="${s.thumbnail}" alt="${escapeHtml(s.title)}" loading="lazy" />
+    </a>
+
+    <div class="video-info">
+      <h3>${escapeHtml(s.title)}</h3>
+      <div class="video-meta">
+        <p class="video-date">${formattedDate}</p>
+        <p class="video-duration">${formatMinutesToHM(s.durationMinutes)}</p>
+        ${untaggedLabel}
       </div>
     </div>
-  `).join("");
+  </div>
+`;
+}).join("");
+
 }
 
 function streamHasTagValue(stream, tagName) {
@@ -269,33 +338,53 @@ function streamHasTagValue(stream, tagName) {
 }
 
 function filterAndSortStreams() {
-  if (!allStreams.length) return;
+  if (!allStreams?.length) return;
 
   const searchTerm = (document.getElementById("searchInput")?.value || "").toLowerCase();
   const sortOrder = document.getElementById("sortOrder")?.value || "newest";
-  const minVal = parseInt(document.getElementById("minDuration")?.value || 0);
-  const maxVal = parseInt(document.getElementById("maxDuration")?.value || 9999);
+  const minVal = parseInt(document.getElementById("durationMin")?.value || 0);
+  const maxVal = parseInt(document.getElementById("durationMax")?.value || 9999);
 
-  const includeTags = Object.entries(tagStates).filter(([_, v]) => v === "include").map(([k]) => k);
-  const excludeTags = Object.entries(tagStates).filter(([_, v]) => v === "exclude").map(([k]) => k);
+  const useGame = document.getElementById("filterGame")?.checked;
+  const useZatsu = document.getElementById("filterZatsu")?.checked;
+
+  const includeTags = Object.entries(tagStates)
+    .filter(([_, v]) => v === "include")
+    .map(([k]) => k);
+
+  const excludeTags = Object.entries(tagStates)
+    .filter(([_, v]) => v === "exclude")
+    .map(([k]) => k);
 
   const filtered = allStreams.filter((s) => {
-    const inRange = s.durationMinutes >= minVal && s.durationMinutes <= maxVal;
+    const duration = useGame
+      ? s.gameDuration || 0
+      : useZatsu
+      ? s.zatsuDuration || 0
+      : s.durationMinutes || 0;
+
+    const inDurationRange = duration >= minVal && duration <= maxVal;
     const matchesText = s.title.toLowerCase().includes(searchTerm);
     const hasIncluded = includeTags.every((t) => streamHasTagValue(s, t));
     const hasExcluded = excludeTags.some((t) => streamHasTagValue(s, t));
-    return inRange && matchesText && hasIncluded && !hasExcluded;
+
+    return inDurationRange && matchesText && hasIncluded && !hasExcluded;
   });
 
   filtered.sort((a, b) => {
-    if (sortOrder === "oldest") return new Date(a.date) - new Date(b.date);
-    if (sortOrder === "shortest") return a.durationMinutes - b.durationMinutes;
-    if (sortOrder === "longest") return b.durationMinutes - a.durationMinutes;
-    return new Date(b.date) - new Date(a.date);
+    switch (sortOrder) {
+      case "oldest": return new Date(a.date) - new Date(b.date);
+      case "shortest": return a.durationMinutes - b.durationMinutes;
+      case "longest": return b.durationMinutes - a.durationMinutes;
+      default: return new Date(b.date) - new Date(a.date);
+    }
   });
 
   displayStreams(filtered);
 }
+
+
+
 
 
 // ==== MAIN INITIALIZATION LOGIC ====
@@ -312,16 +401,184 @@ async function initMainPage() {
     const fetched = await getVideosFromPlaylist(playlistId);
 
     const sample = Object.keys(Object.values(tagMap)[0] || {});
-    if (!sample.length) {
-      console.warn("[Tags] No tag columns found in CSV.");
-    }
-    const tagNames = sample.filter((t) => t !== "stream_link" && t !== "zatsu_start");
+    const tagNames = sample.filter(
+      (t) => !["stream_link", "zatsu_start", "zatsuStartMinutes"].includes(t)
+    );
     createTagButtons(tagNames);
 
-    allStreams = fetched.map((s) => ({ ...s, tags: tagMap[s.id] || {} }));
+allStreams = fetched.map((s) => {
+  const tags = tagMap[s.id] || {};
+  const zatsuStart = tags.zatsuStartMinutes || 0;
+  const total = s.durationMinutes || 0;
+  const zatsuDuration = Math.max(0, total - zatsuStart);
+  const gameDuration = Math.max(0, zatsuStart);
 
-    const realMax = Math.max(30, Math.ceil(Math.max(...allStreams.map((s) => s.durationMinutes), 1)));
-    setupDualSlider(realMax);
+  return {
+    ...s,
+    tags,
+    zatsuStartMinutes: zatsuStart,
+    zatsuDuration,
+    gameDuration,
+  };
+});
+
+
+// ==== Initialize slider ====
+let currentDurationType = "full"; // "full", "game", or "zatsu"
+let currentMinVal = 0;
+let currentMaxVal = 0;
+
+function getDurationMaxForType(type) {
+  switch (type) {
+    case "game":
+      return Math.max(10, Math.ceil(Math.max(...allStreams.map(s => s.gameDuration))));
+    case "zatsu":
+      return Math.max(10, Math.ceil(Math.max(...allStreams.map(s => s.zatsuDuration))));
+    default:
+      return Math.max(30, Math.ceil(Math.max(...allStreams.map(s => s.durationMinutes))));
+  }
+}
+
+function updateSliderBounds(preserve = true) {
+  const realMax = getDurationMaxForType(currentDurationType);
+
+  // Preserve old slider state if requested
+  let newMin = 0, newMax = realMax;
+
+if (preserve && currentMaxVal > 0) {
+  const prevMax = getDurationMaxForType("full");
+  const atFull = Math.abs(currentMaxVal - prevMax) <= 1;
+  if (atFull) newMax = realMax;
+  else {
+    newMin = currentMinVal;
+    newMax = Math.min(currentMaxVal, realMax);
+  }
+}
+
+
+  setupDualSlider({
+    minId: "durationMin",
+    maxId: "durationMax",
+    fillId: "durationRangeFill",
+    minLabelId: "durationMinLabel",
+    maxLabelId: "durationMaxLabel",
+    containerId: "durationSliderContainer",
+    realMax,
+    onChange: (min, max) => {
+      currentMinVal = min;
+      currentMaxVal = max;
+      filterAndSortStreams();
+    },
+  });
+
+  // Restore slider positions AFTER setupDualSlider rebuilds them
+  const minEl = document.getElementById("durationMin");
+  const maxEl = document.getElementById("durationMax");
+  const fill = document.getElementById("durationRangeFill");
+  const minLbl = document.getElementById("durationMinLabel");
+  const maxLbl = document.getElementById("durationMaxLabel");
+
+  if (minEl && maxEl && fill) {
+    minEl.value = newMin;
+    maxEl.value = newMax;
+
+    // ✅ Properly recalc fill position with the new max bounds
+    const sliderMin = parseFloat(minEl.min);
+    const sliderMax = parseFloat(maxEl.max);
+    const range = Math.max(1, sliderMax - sliderMin);
+    const percentMin = ((newMin - sliderMin) / range) * 100;
+    const percentMax = ((newMax - sliderMin) / range) * 100;
+    fill.style.left = percentMin + "%";
+    fill.style.width = Math.max(0, percentMax - percentMin) + "%";
+
+    if (minLbl) minLbl.textContent = formatMinutesShort(newMin);
+    if (maxLbl) maxLbl.textContent = formatMinutesShort(newMax);
+  }
+
+}
+
+
+// Initial setup (default full stream duration)
+const fullMax = getDurationMaxForType("full");
+currentMinVal = 0;
+currentMaxVal = fullMax;
+updateSliderBounds(false);
+  // --- wire up the three mode buttons (Full / Game / Zatsu) ---
+  const modeButtons = document.querySelectorAll("#durationSection .mode-btn");
+  modeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      // visual toggle
+      modeButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      // set mode and update slider bounds (preserve absolute unless previously max)
+      const newMode = btn.dataset.mode || (btn.id === "modeGame" ? "game" : btn.id === "modeZatsu" ? "zatsu" : "full");
+      currentDurationType = newMode;
+      // update slider bounds and refresh UI
+      updateSliderBounds(true);
+      // ensure fill & labels redraw (slider's handler will do this, but force one frame)
+      requestAnimationFrame(() => {
+        const minEl = document.getElementById("durationMin");
+        const maxEl = document.getElementById("durationMax");
+        if (minEl && maxEl) {
+          minEl.dispatchEvent(new Event("input", { bubbles: true }));
+          maxEl.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      });
+      filterAndSortStreams();
+    });
+  });
+
+
+// ==== DURATION MODE TOGGLE (Full / Game / Zatsu) ====
+
+const durationModes = ["full", "game", "zatsu"];
+let currentMode = "full";
+
+function renderDurationHeader() {
+  const container = document.getElementById("durationHeader");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="duration-header-title">Duration</div>
+    <div class="duration-header-options">
+      ${durationModes
+        .map(
+          (m) =>
+            `<span class="duration-option ${m === currentMode ? "active" : ""}" data-mode="${m}">
+              ${m.charAt(0).toUpperCase() + m.slice(1)}
+            </span>`
+        )
+        .join(" ")}
+    </div>
+  `;
+
+  container.querySelectorAll(".duration-option").forEach((opt) => {
+    opt.addEventListener("click", () => {
+      const newMode = opt.dataset.mode;
+      if (newMode === currentMode) return; // no change
+      currentMode = newMode;
+      updateDurationMode();
+    });
+  });
+}
+
+function updateDurationMode() {
+  // Update visuals
+  renderDurationHeader();
+
+  // Map mode to type
+  currentDurationType = currentMode;
+
+  // Trigger slider update
+  updateSliderBounds(true);
+  filterAndSortStreams();
+}
+
+// Initialize header after slider setup
+renderDurationHeader();
+
+
 
     document.getElementById("searchInput")?.addEventListener("input", filterAndSortStreams);
     document.getElementById("sortOrder")?.addEventListener("change", filterAndSortStreams);
@@ -333,6 +590,7 @@ async function initMainPage() {
       "<p style='text-align:center;color:#aaa;'>Error loading data.</p>";
   }
 }
+
 
 
 // ==== CONDITIONAL INIT ====

@@ -15,10 +15,10 @@
 
     <div class="channel-info">
       <div class="social-icons">
-        <a href="https://twitter.com/,,," target="_blank" rel="noopener">
+        <a href="https://twitter.com/FeileacanCu" target="_blank" rel="noopener">
           <img src="twitter_logo.png" alt="Twitter" class="social-icon" />
         </a>
-        <a href="https://,,,.blogspot.com/" target="_blank" rel="noopener">
+        <a href="https://metamorphosislost.blogspot.com/" target="_blank" rel="noopener">
           <img src="blogspot_logo.png" alt="Blogspot" class="social-icon" />
         </a>
       </div>
@@ -38,19 +38,34 @@
       <div id="tag-filters" class="tag-filters"></div>
     </div>
 
-    <div class="slider-group">
-      <label>Duration:</label>
-      <div class="slider-row">
-        <div class="slider-container" id="sliderContainer">
-          <input type="range" id="minDuration" />
-          <input type="range" id="maxDuration" />
-          <div class="range-fill" id="rangeFill"></div>
-        </div>
-        <div class="duration-values">
-          <span id="minLabel">0</span> — <span id="maxLabel">0</span> min
-        </div>
-      </div>
+<div id="durationSection" class="duration-selection">
+  <!-- top row: min label — center "Duration" title — max label -->
+  <div class="duration-top">
+    <span id="durationMinLabel" class="edge-label">0:00</span>
+    <span class="duration-headline">Duration</span>
+    <span id="durationMaxLabel" class="edge-label">999</span>
+  </div>
+
+  <!-- slider area -->
+  <div id="durationSliderContainer" class="slider-wrap">
+    <div class="range-track">
+      <div id="durationRangeFill" class="range-fill"></div>
     </div>
+
+    <!-- two overlays for thumbs (positioned to same width as track) -->
+    <input type="range" id="durationMin" aria-label="Min duration" />
+    <input type="range" id="durationMax" aria-label="Max duration" />
+  </div>
+
+  <!-- bottom row: three evenly-spaced clickable modes within slider width -->
+  <div class="duration-modes-row">
+    <span class="mode-btn active" data-mode="full" id="modeFull">Full</span>
+    <span class="mode-btn" data-mode="game" id="modeGame">Game</span>
+    <span class="mode-btn" data-mode="zatsu" id="modeZatsu">Zatsu</span>
+  </div>
+</div>
+
+
 
     <select id="sortOrder">
       <option value="newest">Newest First</option>
