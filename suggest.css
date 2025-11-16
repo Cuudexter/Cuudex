@@ -8,68 +8,6 @@ body {
 }
 
 /* ==== Return Link ==== */
-.return-link {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  color: #00cc66;
-  font-size: 0.9rem;
-  text-decoration: none;
-  background: rgba(0, 204, 102, 0.1);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-
-.return-link:hover {
-  background: rgba(0, 204, 102, 0.25);
-}
-
-/* ==== Suggest Page ==== */
-.suggest-page {
-  max-width: 900px;
-  margin: 4rem auto 2rem;
-  padding: 1rem 2rem;
-  text-align: center;
-}
-
-.suggest-page h2 {
-  font-size: 1.6rem;
-  margin-bottom: 0.5rem;
-  color: #fff;
-}
-
-.suggest-page p {
-  color: #aaa;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-}
-
-/* Shorter tag input */
-#tagNameInput {
-  width: 40%;
-  max-width: 260px;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #444;
-  background: #1c1c1c;
-  color: #fff;
-  font-size: 1rem;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-#tagNameInput:focus {
-  outline: none;
-  border-color: #00cc66;
-  background: #1a1a1a;
-}
-
-#tagNameInput.filled {
-  border-color: #00cc66;
-  background-color: rgba(0, 204, 102, 0.1);
-}
-
-/* Top navigation and tag banner */
 #returnLink {
   position: fixed;
   top: 1rem;
@@ -84,6 +22,7 @@ body {
   color: #fff;
 }
 
+/* ==== Tag Banner ==== */
 #tagBanner {
   position: fixed;
   top: 1rem;
@@ -118,7 +57,27 @@ body {
   color: #fff;
 }
 
-/* Make input shorter */
+/* ==== Suggest Page ==== */
+.suggest-page {
+  max-width: 900px;
+  margin: 4rem auto 2rem;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+.suggest-page h2 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.suggest-page p {
+  color: #aaa;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ==== Tag Input ==== */
 #tagNameInput {
   width: 220px;
   padding: 0.4rem 0.6rem;
@@ -127,12 +86,20 @@ body {
   border: 1px solid #555;
   background: #222;
   color: #fff;
+  font-size: 1rem;
+  transition: background 0.2s, border-color 0.2s;
 }
+
+#tagNameInput:focus {
+  outline: none;
+  border-color: #00cc66;
+  background: #1a1a1a;
+}
+
 #tagNameInput.filled {
   border-color: #00cc66;
   background: #1c1c1c;
 }
-
 
 /* ==== Search Bar ==== */
 .search-container {
@@ -269,4 +236,50 @@ body {
   cursor: not-allowed;
 }
 
+/* ==== Responsive Tweaks ==== */
+@media (max-width: 700px) {
+  #tagNameInput,
+  #searchStreams {
+    width: 70%;
+    max-width: none;
+  }
 
+  .suggest-page {
+    padding: 1rem;
+    margin: 3rem auto 2rem;
+  }
+
+  .stream-item img {
+    height: auto; /* preserve aspect ratio on narrow screens */
+  }
+}
+
+@media (max-width: 480px) {
+  #tagNameInput,
+  #searchStreams {
+    width: 90%;
+  }
+
+  .stream-item {
+    max-width: 100%;
+    padding: 0.6rem;
+  }
+
+  .stream-item img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .buttons {
+    gap: 0.5rem;
+  }
+
+  .btn-yes,
+  .btn-no {
+    font-size: 1.2rem;
+  }
+
+  #submitTag {
+    width: 90%;
+  }
+}

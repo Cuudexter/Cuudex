@@ -3,16 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Suggest Tag</title>
+  <title>Suggest a Tag — Cuudex</title>
   <link rel="stylesheet" href="suggest.css" />
 </head>
 <body>
-<a href="index.html" id="returnLink">← Return to Cuudex</a>
 
-<div id="tagBanner" class="hidden">
-  <span id="tagBannerText"></span>
-  <button id="changeTagBtn">Change tag</button>
-</div>
+  <!-- Navigation back to main page -->
+  <nav>
+    <a href="index.html" id="returnLink">← Return to Cuudex</a>
+  </nav>
+
+  <!-- Tag info banner (hidden by default) -->
+  <div id="tagBanner" class="hidden" aria-live="polite">
+    <span id="tagBannerText"></span>
+    <button id="changeTagBtn">Change tag</button>
+  </div>
 
   <main class="suggest-page">
     <h2>Suggest a Tag</h2>
@@ -23,17 +28,23 @@
       Please double-check your tag spelling before submitting.
     </p>
 
+    <!-- Tag input -->
+    <label for="tagNameInput" class="visually-hidden">Tag Name</label>
     <input id="tagNameInput" type="text" placeholder="Enter new tag name..." />
 
+    <!-- Search streams -->
     <div class="search-container">
       <input id="searchStreams" type="text" placeholder="Search streams by title..." />
     </div>
 
+    <!-- Streams list -->
     <div id="streamList" class="stream-list"></div>
 
+    <!-- Submit button -->
     <button id="submitTag" disabled>Submit Tag</button>
   </main>
 
+  <!-- Scripts -->
   <script src="script.js"></script>
   <script src="suggest.js"></script>
 </body>

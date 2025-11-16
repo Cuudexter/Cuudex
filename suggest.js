@@ -9,8 +9,22 @@ async function initSuggest() {
   const input = document.getElementById("tagNameInput");
   const list = document.getElementById("streamList");
   const submit = document.getElementById("submitTag");
-  const tagBanner = document.getElementById("tagBanner");
   const searchBox = document.getElementById("searchStreams");
+
+  // --- Hardcoded existing tag list ---
+  const existingTags = [
+    "One-Shot",
+    "Existential",
+    "Funny",
+    "Horror",
+    "Visual Novel",
+    "Interactive",
+    "Lore",
+    "Roleplay",
+    "Collab",
+    "BL/GL",
+    "Story-Driven"
+  ];
 
   let chosenTag = "";
 
@@ -27,9 +41,9 @@ async function initSuggest() {
       const value = input.value.trim();
       if (value) {
         chosenTag = value;
-        input.blur(); // deselect input
+        input.blur();
         input.classList.add("filled");
-        input.disabled = true; // lock input
+        input.disabled = true;
         showTagBanner(chosenTag);
         submit.disabled = false;
       }
@@ -37,21 +51,20 @@ async function initSuggest() {
   });
 
   function showTagBanner(tagName) {
-  const tagBanner = document.getElementById("tagBanner");
-  const tagBannerText = document.getElementById("tagBannerText");
-  const changeBtn = document.getElementById("changeTagBtn");
+    const tagBanner = document.getElementById("tagBanner");
+    const tagBannerText = document.getElementById("tagBannerText");
+    const changeBtn = document.getElementById("changeTagBtn");
 
-  tagBannerText.textContent = `Tagging "${tagName}"`;
-  tagBanner.classList.remove("hidden");
+    tagBannerText.textContent = `Tagging "${tagName}"`;
+    tagBanner.classList.remove("hidden");
 
-  changeBtn.onclick = () => {
-    const input = document.getElementById("tagNameInput");
-    input.disabled = false;
-    input.focus();
-    input.classList.remove("filled");
-    tagBanner.classList.add("hidden");
-  };
-}
+    changeBtn.onclick = () => {
+      input.disabled = false;
+      input.focus();
+      input.classList.remove("filled");
+      tagBanner.classList.add("hidden");
+    };
+  }
 
   // --- Search filter ---
   if (searchBox) {
@@ -86,11 +99,53 @@ async function initSuggest() {
       return;
     }
 
-    console.log("✅ Suggested tag:", tagName);
-    console.log("Yes selections:", [...yesSelections]);
-    console.log("No selections:", [...noSelections]);
+    // ===== Build CSV header =====
+    const header = [
+      "stream_link",
+      "zatsu_start",
+      ...existingTags,
+      tagName,         // the new suggested tag
+      "stream_title"   // always last
+    ];
 
-    alert(`✅ Your tag suggestion "${tagName}" was recorded (locally).`);
+    const rows = [header.join(",")];
+
+    // ===== Build CSV rows =====
+    for (const v of videos) {
+      const link = `https://www.youtube.com/watch?v=${v.id}`;
+      const title = v.title.replace(/"/g, '""');
+
+      // Existing tags are empty for now
+      const existingTagValues = existingTags.map(() => "");
+
+      let newTagValue = "";
+      if (yesSelections.has(v.id)) newTagValue = "1";
+      else if (noSelections.has(v.id)) newTagValue = "0";
+
+      const row = [
+        link,
+        "",                  // zatsu_start placeholder
+        ...existingTagValues,
+        newTagValue,
+        `"${title}"`         // stream title last
+      ];
+
+      rows.push(row.join(","));
+    }
+
+    // ===== Export CSV =====
+    const csvContent = rows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tag_suggestion_${tagName}.csv`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    alert(`✅ CSV for "${tagName}" generated!`);
   });
 }
 

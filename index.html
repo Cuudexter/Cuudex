@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -8,12 +9,16 @@
 </head>
 
 <body>
+
+  <!-- ===== Channel Header ===== -->
   <header class="channel-header">
+    <!-- Channel thumbnail linking to YouTube -->
     <a id="youtube-link" href="#" target="_blank" rel="noopener">
       <img id="channel-thumbnail" src="" alt="Channel Thumbnail" />
     </a>
 
     <div class="channel-info">
+      <!-- Social media links -->
       <div class="social-icons">
         <a href="https://twitter.com/FeileacanCu" target="_blank" rel="noopener">
           <img src="twitter_logo.png" alt="Twitter" class="social-icon" />
@@ -23,56 +28,64 @@
         </a>
       </div>
 
+      <!-- Channel title -->
       <h1 id="channel-title">
         <a href="#" id="channel-link" target="_blank" rel="noopener">Channel Name</a>
       </h1>
     </div>
   </header>
 
+  <!-- ===== Controls: Search, Tag Suggestion, Filters, Duration, Sort ===== -->
   <div class="controls">
+    <!-- Stream search input -->
     <input type="text" id="searchInput" placeholder="Search streams..." />
 
+    <!-- Suggest new tag button -->
     <button id="suggestTagBtn" class="suggest-btn">Suggest Tag</button>
 
+    <!-- Tag filters container -->
     <div class="tag-filters">
       <div id="tag-filters" class="tag-filters"></div>
     </div>
 
-<div id="durationSection" class="duration-selection">
-  <!-- top row: min label — center "Duration" title — max label -->
-  <div class="duration-top">
-    <span id="durationMinLabel" class="edge-label">0:00</span>
-    <span class="duration-headline">Duration</span>
-    <span id="durationMaxLabel" class="edge-label">999</span>
-  </div>
+    <!-- Duration selection -->
+    <div id="durationSection" class="duration-selection">
 
-  <!-- slider area -->
-  <div id="durationSliderContainer" class="slider-wrap">
-    <div class="range-track">
-      <div id="durationRangeFill" class="range-fill"></div>
+      <!-- Top row: min label, center title, max label -->
+      <div class="duration-top">
+        <span id="durationMinLabel" class="edge-label">0:00</span>
+        <span class="duration-headline">Duration</span>
+        <span id="durationMaxLabel" class="edge-label">999</span>
+      </div>
+
+      <!-- Slider area -->
+      <div id="durationSliderContainer" class="slider-wrap">
+        <div class="range-track">
+          <div id="durationRangeFill" class="range-fill"></div>
+        </div>
+
+        <!-- Range inputs (thumbs) -->
+        <input type="range" id="durationMin" aria-label="Min duration" />
+        <input type="range" id="durationMax" aria-label="Max duration" />
+      </div>
+
+      <!-- Bottom row: clickable modes -->
+      <div class="duration-modes-row">
+        <span class="mode-btn active" data-mode="full" id="modeFull">Full</span>
+        <span class="mode-btn" data-mode="game" id="modeGame">Game</span>
+        <span class="mode-btn" data-mode="zatsu" id="modeZatsu">Zatsu</span>
+      </div>
+
     </div>
 
-    <!-- two overlays for thumbs (positioned to same width as track) -->
-    <input type="range" id="durationMin" aria-label="Min duration" />
-    <input type="range" id="durationMax" aria-label="Max duration" />
-  </div>
-
-  <!-- bottom row: three evenly-spaced clickable modes within slider width -->
-  <div class="duration-modes-row">
-    <span class="mode-btn active" data-mode="full" id="modeFull">Full</span>
-    <span class="mode-btn" data-mode="game" id="modeGame">Game</span>
-    <span class="mode-btn" data-mode="zatsu" id="modeZatsu">Zatsu</span>
-  </div>
-</div>
-
-
-
+    <!-- Sort order dropdown -->
     <select id="sortOrder">
       <option value="newest">Newest First</option>
       <option value="oldest">Oldest First</option>
     </select>
   </div>
 
+  <!-- ===== Main Grid: Video/Stream Tiles ===== -->
   <main id="video-grid"></main>
 
   <!-- Embedded CSV tag data -->
@@ -120,6 +133,9 @@ https://www.youtube.com/watch?v=e082PDwOnX8, 6:56:27,1,,,1,,,,,,,1,
 https://www.youtube.com/watch?v=etyQnriXXmA, 2:03:30,,,1,,,1,,1,,,,
 https://www.youtube.com/watch?v=2r5RinTHXQo, 5:51:20,,,,1,,,,,,,1,
 </script>
-<script src="script.js"></script>
+
+  <!-- Main JavaScript -->
+  <script src="script.js"></script>
+
 </body>
 </html>
