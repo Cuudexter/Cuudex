@@ -47,12 +47,14 @@
   <script src="script.js" defer></script>
 
   <!-- EmailJS SDK -->
-<script src="https://cdn.emailjs.com/sdk/3.11.0/email.min.js"></script>
-<script>
-  // Initialize EmailJS immediately after SDK loads
-  emailjs.init("B9sxlT369XvaI9NAp");
-</script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      emailjs.init({
+        publicKey: "B9sxlT369XvaI9NAp"
+      });
+    });
+  </script>
 
   <!-- Suggest page logic -->
   <script src="suggest.js" defer></script>
