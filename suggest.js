@@ -11,26 +11,35 @@ async function initSuggest() {
   const submit = document.getElementById("submitTag");
   const searchBox = document.getElementById("searchStreams");
 
-  // --- Hardcoded existing tag list ---
-  const existingTags = [
-    "One-Shot",
-    "Existential",
-    "Funny",
-    "Horror",
-    "Visual Novel",
-    "Interactive",
-    "Lore",
-    "Roleplay",
-    "Collab",
-    "BL/GL",
-    "Story-Driven"
-  ];
-
   let chosenTag = "";
+  let existingTags = [];
+  let metadataRows = []; // full CSV data including existing tags
 
   // Safety check
   if (!input || !list || !submit) {
     console.warn("Missing essential DOM elements on suggest.html — skipping setup.");
+    return;
+  }
+
+  // --- Load metadata.csv ---
+  try {
+    const res = await fetch("metadata.csv");
+    const csvText = await res.text();
+    metadataRows = parseCSV(csvText);
+
+    const header = metadataRows[0]; // first row
+    existingTags = header.slice(2); // skip stream_link + zatsu_start
+
+    // Remove stream_title if present at the end
+    const last = existingTags[existingTags.length - 1];
+    if (last && last.toLowerCase().includes("title")) {
+      existingTags.pop();
+    }
+
+    console.log("Loaded existing tags:", existingTags);
+  } catch (err) {
+    console.error("Failed to load metadata.csv", err);
+    alert("⚠️ Could not load metadata.csv — suggestion cannot be sent.");
     return;
   }
 
@@ -92,7 +101,7 @@ async function initSuggest() {
   }
 
   // --- Submit handler ---
-  submit.addEventListener("click", () => {
+  submit.addEventListener("click", async () => {
     const tagName = input.value.trim();
     if (!tagName) {
       alert("Please enter a tag name first!");
@@ -104,48 +113,61 @@ async function initSuggest() {
       "stream_link",
       "zatsu_start",
       ...existingTags,
-      tagName,         // the new suggested tag
-      "stream_title"   // always last
+      tagName,
+      "stream_title"
     ];
-
     const rows = [header.join(",")];
 
-    // ===== Build CSV rows =====
+    // Build a map for fast metadata lookup by stream link
+    const metadataMap = {};
+    for (let i = 1; i < metadataRows.length; i++) {
+      const row = metadataRows[i];
+      metadataMap[row[0]] = row; // key: stream_link
+    }
+
+    // Merge videos from playlist with metadata
     for (const v of videos) {
       const link = `https://www.youtube.com/watch?v=${v.id}`;
       const title = v.title.replace(/"/g, '""');
+      const metaRow = metadataMap[link] || [];
 
-      // Existing tags are empty for now
-      const existingTagValues = existingTags.map(() => "");
+      // Existing tags preserved
+      const existingTagValues = existingTags.map((_, idx) => metaRow[idx + 2] || "");
 
       let newTagValue = "";
       if (yesSelections.has(v.id)) newTagValue = "1";
       else if (noSelections.has(v.id)) newTagValue = "0";
 
       const row = [
-        link,
-        "",                  // zatsu_start placeholder
-        ...existingTagValues,
-        newTagValue,
-        `"${title}"`         // stream title last
+        metaRow[0] || link,     // stream_link
+        metaRow[1] || "",       // zatsu_start
+        ...existingTagValues,   // existing tags
+        newTagValue,            // suggested tag
+        `"${title}"`            // stream title
       ];
 
       rows.push(row.join(","));
     }
 
-    // ===== Export CSV =====
-    const csvContent = rows.join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+    const csvText = rows.join("\n");
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `tag_suggestion_${tagName}.csv`;
-    a.click();
+    // ===== Email via EmailJS =====
+    try {
+      const response = await emailjs.send(
+        "service_wk26mhd",
+        "template_6eyzp4i",
+        {
+          tag_name: tagName,
+          csv_text: csvText
+        }
+      );
 
-    URL.revokeObjectURL(url);
-
-    alert(`✅ CSV for "${tagName}" generated!`);
+      console.log("EmailJS response:", response);
+      alert(`📨 Suggestion sent! Thank you for helping improve the Cuudex.`);
+    } catch (error) {
+      console.error("EmailJS error:", error);
+      alert("❌ Failed to send suggestion. Please try again later.");
+    }
   });
 }
 
@@ -190,4 +212,12 @@ function renderStreams(videos, container, yesSelections, noSelections) {
       e.target.previousElementSibling.classList.remove("selected");
     }
   });
+}
+
+// ---- Simple CSV parser helper ----
+function parseCSV(csvText) {
+  return csvText
+    .trim()
+    .split("\n")
+    .map((line) => line.split(","));
 }
