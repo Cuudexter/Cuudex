@@ -164,7 +164,7 @@ async function initSuggest() {
         );
 
       console.log("EmailJS response:", response);
-      alert(`📨 Suggestion sent! Thank you for helping improve the Cuudex.`);
+      alert(`📨 Suggestion sent! Thank you for helping to improve Cuudex.`);
     } catch (error) {
       console.error("EmailJS error:", error);
       alert("❌ Failed to send suggestion. Please try again later.");
