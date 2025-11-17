@@ -47,11 +47,11 @@
 <script type="module">
   import emailjs from "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
 
-  emailjs.init({
-    publicKey: "B9sxlT369XvaI9NAp"
+  window.emailReady = new Promise(resolve => {
+    emailjs.init({ publicKey: "B9sxlT369XvaI9NAp" });
+    window.emailjs = emailjs;
+    resolve();
   });
-
-  window.emailjs = emailjs;
 </script>
 
 <script src="script.js"></script>

@@ -150,18 +150,22 @@ async function initSuggest() {
     }
 
     const csvText = rows.join("\n");
-    console.log("CSV length:", csvText.length);
 
-    // ===== Email via EmailJS =====
-    try {
-      const response = await emailjs.send(
-        "service_wk26mhd",
-        "template_6eyzp4i",
-        {
-          tag_name: tagName,
-          csv_text: "test"
-        }
-      );
+      // ===== Email via EmailJS =====
+      try {
+        // Wait for EmailJS to finish loading & initializing
+        await window.emailReady;
+
+        const response = await window.emailjs.send(
+          "service_wk26mhd",
+          "template_6eyzp4i",
+          {
+            tag_name: tagName,
+            csv_text: csvText
+          }
+        );
+
+
 
       console.log("EmailJS response:", response);
       alert(`📨 Suggestion sent! Thank you for helping improve the Cuudex.`);
