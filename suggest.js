@@ -159,7 +159,7 @@ async function initSuggest() {
         "template_6eyzp4i",
         {
           tag_name: tagName,
-          csv_text: csvText
+          csv_text: "test"
         }
       );
 
