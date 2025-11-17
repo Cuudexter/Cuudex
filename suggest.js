@@ -159,11 +159,9 @@ async function initSuggest() {
           "template_6eyzp4i",
           {
             tag_name: tagName,
-            csv_text: "test"
+            csv_text: csvText
           }
         );
-
-
 
       console.log("EmailJS response:", response);
       alert(`📨 Suggestion sent! Thank you for helping improve the Cuudex.`);
