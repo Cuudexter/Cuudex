@@ -153,19 +153,16 @@ async function initSuggest() {
 
       // ===== Email via EmailJS =====
       try {
-        // Wait for EmailJS to finish loading & initializing
-        await window.emailReady;
-
-        const response = await window.emailjs.send(
+        const response = await emailjs.send(
           "service_wk26mhd",
           "template_6eyzp4i",
           {
             tag_name: tagName,
-            csv_text: csvText
+            csv_text: "test"
           }
         );
 
-
+        
 
       console.log("EmailJS response:", response);
       alert(`📨 Suggestion sent! Thank you for helping improve the Cuudex.`);

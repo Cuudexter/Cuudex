@@ -44,15 +44,14 @@
   </main>
 
 <!-- EmailJS SDK -->
-<script type="module">
-  import emailjs from "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
-
-  window.emailReady = new Promise(resolve => {
-    emailjs.init({ publicKey: "B9sxlT369XvaI9NAp" });
-    window.emailjs = emailjs;
-    resolve();
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    emailjs.init("B9sxlT369XvaI9NAp");
+    console.log("EmailJS initialized globally");
   });
 </script>
+
 
 <script src="script.js"></script>
 <script src="suggest.js"></script>
