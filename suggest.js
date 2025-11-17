@@ -1,6 +1,7 @@
 // ==== suggest.js ====
 
 document.addEventListener("DOMContentLoaded", initSuggest);
+console.log("In suggest.js, emailjs is:", typeof emailjs);
 
 async function initSuggest() {
   console.log("Suggest Tag page initializing...");
@@ -162,7 +163,7 @@ async function initSuggest() {
           }
         );
 
-        
+
 
       console.log("EmailJS response:", response);
       alert(`📨 Suggestion sent! Thank you for helping improve the Cuudex.`);

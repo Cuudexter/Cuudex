@@ -43,18 +43,22 @@
     <button id="submitTag" disabled>Submit Tag</button>
   </main>
 
-<!-- EmailJS SDK -->
+<!-- EmailJS SDK FIRST -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<!-- Initialize EmailJS BEFORE loading your scripts -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    console.log("Initializing EmailJS...");
     emailjs.init("B9sxlT369XvaI9NAp");
-    console.log("EmailJS initialized globally");
+    console.log("EmailJS ready:", typeof emailjs);
   });
 </script>
 
+<!-- NOW load your scripts AFTER EmailJS is defined -->
+<script src="script.js" defer></script>
+<script src="suggest.js" defer></script>
 
-<script src="script.js"></script>
-<script src="suggest.js"></script>
 
 
 </body>
