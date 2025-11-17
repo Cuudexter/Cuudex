@@ -44,17 +44,19 @@
   </main>
 
 <!-- EmailJS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="module">
+  import emailjs from "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
 
-<script>
   emailjs.init({
     publicKey: "B9sxlT369XvaI9NAp"
   });
+
+  window.emailjs = emailjs;
 </script>
 
-<!-- Now load your scripts AFTER init -->
 <script src="script.js"></script>
 <script src="suggest.js"></script>
+
 
 </body>
 </html>
