@@ -43,21 +43,18 @@
     <button id="submitTag" disabled>Submit Tag</button>
   </main>
 
-  <!-- Scripts -->
-  <script src="script.js" defer></script>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+<script defer>
+  emailjs.init({
+    publicKey: "B9sxlT369XvaI9NAp"
+  });
+</script>
 
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      emailjs.init({
-        publicKey: "B9sxlT369XvaI9NAp"
-      });
-    });
-  </script>
+<!-- Your application scripts -->
+<script src="script.js" defer></script>
+<script src="suggest.js" defer></script>
 
-  <!-- Suggest page logic -->
-  <script src="suggest.js" defer></script>
 
 </body>
 </html>
