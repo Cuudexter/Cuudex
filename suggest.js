@@ -150,6 +150,7 @@ async function initSuggest() {
     }
 
     const csvText = rows.join("\n");
+    console.log("CSV length:", csvText.length);
 
     // ===== Email via EmailJS =====
     try {
