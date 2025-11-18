@@ -598,3 +598,34 @@ select {
   background: #333;
   color: #fff;
 }
+
+
+#collapseTagsBtn {
+  background: #ffffff0d;       /* slightly translucent white (your inverted look) */
+  color: #eee;
+  border: 1px solid #ffffff22; /* keep the "inverted" light border, but softer */
+  padding: 6px 10px;
+  cursor: pointer;
+  transform: skewX(-20deg);
+  border-radius: 4px;
+  outline: none;               /* prevent bright outline */
+  box-shadow: none;            /* prevent bright AA edge on skew */
+}
+
+/* inner text stays upright */
+#collapseTagsBtn > span {
+  display: inline-block;
+  transform: skewX(20deg);
+}
+
+/* hover stays inverted but balanced */
+#collapseTagsBtn:hover {
+  background: #ffffff18;
+  border-color: #ffffff33;
+}
+
+/* remove focus glow that causes the bright pixel */
+#collapseTagsBtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px #ffffff11;
+}
