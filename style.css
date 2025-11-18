@@ -534,14 +534,3 @@ select {
   color: #aaa;
   font-size: 0.9rem;
 }
-
-#sortOrder {
-  width: 135px;  /* Perfect size for "Newest First" */
-  padding: 4px 6px;
-  text-align: center;
-  appearance: none;
-  background-color: #222;
-  color: #eee;
-  border: 1px solid #555;
-  border-radius: 6px;
-}
