@@ -421,3 +421,14 @@ if (!window.location.pathname.includes("suggest")) {
 document.getElementById("suggestTagBtn")?.addEventListener("click", () => {
   window.location.href = "suggest.html";
 });
+
+// === TAG COLLAPSE TOGGLE ===
+const toggleBtn = document.getElementById("toggleTags");
+const tagSection = document.getElementById("tag-filters");
+
+toggleBtn?.addEventListener("click", () => {
+  const collapsed = tagSection.classList.toggle("collapsed");
+
+  // Update label with arrow
+  toggleBtn.textContent = collapsed ? "Tags ▲" : "Tags ▼";
+});

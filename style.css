@@ -488,3 +488,43 @@ select {
 .duration-top {
   margin-bottom: -18px;
 }
+
+
+/* === TAG COLLAPSING === */
+
+.tag-filters-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tag-toggle-btn {
+  margin-bottom: 6px;
+  background: #222;
+  color: #eee;
+  border: 1px solid #555;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.tag-toggle-btn:hover {
+  background: #333;
+}
+
+.tag-section {
+  overflow: hidden;
+  max-height: 1000px; /* expanded */
+  opacity: 1;
+  transition: max-height 0.25s ease, opacity 0.25s ease;
+}
+
+.tag-section.collapsed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
