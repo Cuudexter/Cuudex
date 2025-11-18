@@ -438,11 +438,15 @@ let tagsCollapsed = false;
 collapseBtn?.addEventListener("click", () => {
   tagsCollapsed = !tagsCollapsed;
 
+  // get the <span> that holds the text so the skew stays correct
+  const label = collapseBtn.querySelector("span");
+
   if (tagsCollapsed) {
     tagFilterContainer.style.display = "none";
-    collapseBtn.textContent = "Expand ▸";
+    if (label) label.textContent = "Expand ▸";
   } else {
     tagFilterContainer.style.display = "flex";
-    collapseBtn.textContent = "Collapse ◂";
+    if (label) label.textContent = "Collapse ◂";
   }
 });
+
