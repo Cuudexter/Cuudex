@@ -440,9 +440,9 @@ collapseBtn?.addEventListener("click", () => {
 
   if (tagsCollapsed) {
     tagFilterContainer.style.display = "none";
-    collapseBtn.textContent = "Expand ▲";
+    collapseBtn.textContent = "Expand ▸";
   } else {
     tagFilterContainer.style.display = "flex";
-    collapseBtn.textContent = "Collapse ▼";
+    collapseBtn.textContent = "Collapse ◂";
   }
 });

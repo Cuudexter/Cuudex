@@ -560,3 +560,44 @@ select {
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
+
+/* COLLAPSE BUTTON — skewed like tag buttons */
+.collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 16px;
+  margin-right: 6px;
+
+  background: #222;
+  color: #ccc;
+
+  border: 1px solid #555;
+  cursor: pointer;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  /* Make right side slanted like tag buttons */
+  transform: skewX(-20deg);
+
+  /* Remove rounded corners → square left, slanted right */
+  border-radius: 0;
+
+  transition: all 0.2s ease;
+}
+
+/* Correct text inside the skewed element */
+.collapse-btn span {
+  transform: skewX(20deg);
+  display: inline-block;
+}
+
+/* Hover effect matching tag buttons */
+.collapse-btn:hover {
+  background: #333;
+  color: white;
+  border-color: #777;
+}
