@@ -562,42 +562,39 @@ select {
 }
 
 
-/* COLLAPSE BUTTON — skewed like tag buttons */
+/* COLLAPSE BUTTON — slanted right like tag buttons, square left */
 .collapse-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  padding: 6px 16px;
+  padding: 6px 14px;
   margin-right: 6px;
 
-  background: #222;
-  color: #ccc;
+  /* ORIGINAL COLORS RESTORED */
+  background: #fff;
+  color: #333;
+  border: 2px solid #333;
 
-  border: 1px solid #555;
   cursor: pointer;
-
-  font-size: 0.9rem;
+  font-size: 14px;
   font-weight: 600;
 
-  /* Make right side slanted like tag buttons */
+  /* Slant only on right side */
   transform: skewX(-20deg);
-
-  /* Remove rounded corners → square left, slanted right */
   border-radius: 0;
 
   transition: all 0.2s ease;
 }
 
-/* Correct text inside the skewed element */
+/* Fix text slant */
 .collapse-btn span {
-  transform: skewX(20deg);
   display: inline-block;
+  transform: skewX(20deg);
 }
 
-/* Hover effect matching tag buttons */
+/* Hover: invert colors */
 .collapse-btn:hover {
   background: #333;
-  color: white;
-  border-color: #777;
+  color: #fff;
 }
