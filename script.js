@@ -344,6 +344,13 @@ function filterAndSortStreams() {
     }
   });
 
+    // Update stream count display
+    const countEl = document.getElementById("streamCount");
+    if (countEl) {
+      countEl.textContent = `Showing ${filtered.length} stream${filtered.length === 1 ? "" : "s"}`;
+    }
+
+
   displayStreams(filtered);
 }
 
