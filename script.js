@@ -429,13 +429,20 @@ document.getElementById("suggestTagBtn")?.addEventListener("click", () => {
   window.location.href = "suggest.html";
 });
 
-// === TAG COLLAPSE TOGGLE ===
-const toggleBtn = document.getElementById("toggleTags");
-const tagSection = document.getElementById("tag-filters");
+// === TAG COLLAPSE TOGGLE (INLINE BUTTON) ===
+const collapseBtn = document.getElementById("collapseTagsBtn");
+const tagFilterContainer = document.getElementById("tag-filters");
 
-toggleBtn?.addEventListener("click", () => {
-  const collapsed = tagSection.classList.toggle("collapsed");
+let tagsCollapsed = false;
 
-  // Update label with arrow
-  toggleBtn.textContent = collapsed ? "Tags ▲" : "Tags ▼";
+collapseBtn?.addEventListener("click", () => {
+  tagsCollapsed = !tagsCollapsed;
+
+  if (tagsCollapsed) {
+    tagFilterContainer.style.display = "none";
+    collapseBtn.textContent = "Expand ▲";
+  } else {
+    tagFilterContainer.style.display = "flex";
+    collapseBtn.textContent = "Collapse ▼";
+  }
 });

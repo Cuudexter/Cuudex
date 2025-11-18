@@ -534,3 +534,22 @@ select {
   color: #aaa;
   font-size: 0.9rem;
 }
+
+.collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  margin-right: 6px;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  border: 2px solid #333;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.collapse-btn:hover {
+  background: #333;
+  color: white;
+}
