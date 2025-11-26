@@ -3,7 +3,7 @@
   --card: #1c1c1c;
   --muted: #bbb;
   --track: #333;
-  --accent: #00eeff;
+  --teal: #00eeff;
 }
 
 /* Global box-sizing */
@@ -70,7 +70,7 @@ body {
 }
 
 .social-icon:hover {
-  background: var(--accent);
+  background: var(--teal);
   transform: scale(1.1);
 }
 
@@ -88,7 +88,7 @@ body {
 }
 
 #channel-title a:hover {
-  color: var(--accent);
+  color: var(--teal);
 }
 
 /* ===== CONTROLS ===== */
@@ -119,6 +119,7 @@ select {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   padding: 2rem;
+  padding-top: 0px;
   flex: 1;
   align-content: start;
 }
@@ -329,15 +330,8 @@ select {
   white-space: nowrap;
 }
 
-/* Keep video cards flex column for layout */
-.video-card {
-  display: flex;
-  flex-direction: column;
-}
-
 /* ===== DURATION SLIDER SECTION ===== */
-/* NOTE: Everything below is preserved exactly as you provided.
-   Slider thumbs, fill, and layout will NOT break. */
+
 #durationSliderContainer {
   width: 100%;
   max-width: 460px;
@@ -356,7 +350,6 @@ select {
   align-items: baseline;
   justify-content: space-between;
   line-height: 1.1;
-  margin-bottom: 0;
 }
 
 .duration-top .edge-label {
@@ -392,12 +385,15 @@ select {
   border-radius: 4px;
 }
 
+
+
+
 .range-fill {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
-  background: var(--accent);
+  background: var(--teal);
   border-radius: 4px;
   pointer-events: none;
 }
@@ -420,7 +416,7 @@ select {
   pointer-events: all;
   width: 12px;
   height: 12px;
-  background: var(--accent);
+  background: var(--teal);
   border: 2px solid #111;
   cursor: pointer;
   transform: rotate(45deg);
@@ -432,7 +428,7 @@ select {
   pointer-events: all;
   width: 12px;
   height: 12px;
-  background: var(--accent);
+  background: var(--teal);
   border: 2px solid #111;
   cursor: pointer;
   transform: rotate(45deg);
@@ -535,97 +531,243 @@ select {
   font-size: 0.9rem;
 }
 
-.collapse-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  margin-right: 6px;
-  border-radius: 6px;
-  background: #fff;
-  color: #333;
-  border: 2px solid #333;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.collapse-btn:hover {
-  background: #333;
-  color: white;
-}
-
-.tag-filter-row {
+.tag-section {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
+/* === Collapse Tags Button === */
+#collapseTagsBtn {
+  --slant-w: 14px; /* width of slanted strip */
+  --cut-h: 6px;    /* cut height at the lower-right */
 
-/* COLLAPSE BUTTON — slanted right like tag buttons, square left */
-.collapse-btn {
+  background: transparent; /* must stay transparent! */
+  border: none;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  margin-right: -5px;
+}
+
+/* Text stays normal and above visuals */
+#collapseTagsBtn > span,
+#collapseTagsBtn .label {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  color: #222;
+  padding-left: 2px; /* slight compensation for slanted edge */
+}
+
+/* Square base with clipped bottom-right corner */
+#collapseTagsBtn::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: calc(var(--slant-w));
+  background: #dcdcdc;
+  border: 1px solid #555;
+  z-index: 0;
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% calc(100% - var(--cut-h)),
+    calc(100% - var(--cut-h)) 100%,
+    0% 100%
+  );
+}
+
+/* Slanted extension on the right */
+#collapseTagsBtn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 6px;
+  width: var(--slant-w);
+  bottom: 0;
+  background: #dcdcdc;
+  border-top: 1px solid #555;
+  border-right: 1px solid #555;
+  border-bottom: 1px solid #555;
+  transform-origin: center;
+  transform: skewX(-20deg);
+}
+
+/* Header Buttons (Collabs / Suggest) */
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.header-actions button {
+  background: #00eeff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.header-actions button:hover {
+  background: #08cfe0;
+  transform: scale(1.05);
+}
+
+/* Right-aligned stacked slanted nav buttons (mirrored tag style) */
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;        /* space between the two buttons */
+  margin-left: auto; /* push to right in the header */
+  align-items: flex-end;
+}
+
+/* Mirror-slanted nav buttons matching Collapse color scheme */
+.nav-slant-btn {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+
+  /* Match Collapse button colors */
+  background: #dcdcdc;
+  border: 1px solid #555;
+  color: #222;
+
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: filter 0.18s ease;
+  transform: skewX(20deg);
+  border-radius: 0;
+  line-height: 1;
+}
+
+/* Keep the text upright */
+.nav-slant-btn > span {
+  display: inline-block;
+  transform: skewX(-20deg);
+}
+
+/* ===== Buttons (Collabs / Suggest) ===== */
+
+/* slanted nav buttons */
+.header-actions .nav-slant-btn {
+  transform: skewX(20deg) !important;
+  transform-origin: center right;
+
+  /* animate background/border */
+  transition-property: background-color, border-color;
+  transition-duration: 140ms;
+  transition-timing-function: ease;
+
+  /* Prevent filters from being applied or inherited */
+  filter: none !important;
+
+  /* make layout stable */
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
+  backface-visibility: hidden;
+}
 
-  padding: 6px 14px;
-  margin-right: 6px;
-
-  /* ORIGINAL COLORS RESTORED */
-  background: #fff;
-  color: #333;
-  border: 2px solid #333;
-
-  cursor: pointer;
-  font-size: 14px;
+/* Keep inner text upright */
+.header-actions .nav-slant-btn > span {
+  transform: skewX(-20deg) !important;
+  display: inline-block;
   font-weight: 600;
-
-  /* Slant only on right side */
-  transform: skewX(-20deg);
-  border-radius: 0;
-
-  transition: all 0.2s ease;
+  backface-visibility: hidden;
 }
 
-/* Fix text slant */
-.collapse-btn span {
-  display: inline-block;
-  transform: skewX(20deg);
-}
-
-/* Hover: invert colors */
-.collapse-btn:hover {
-  background: #333;
-  color: #fff;
-}
-
-
-#collapseTagsBtn {
-  background: #ffffff0d;       /* slightly translucent white (your inverted look) */
-  color: #eee;
-  border: 1px solid #ffffff22; /* keep the "inverted" light border, but softer */
-  padding: 6px 10px;
-  cursor: pointer;
-  transform: skewX(-20deg);
-  border-radius: 4px;
-  outline: none;               /* prevent bright outline */
-  box-shadow: none;            /* prevent bright AA edge on skew */
-}
-
-/* inner text stays upright */
-#collapseTagsBtn > span {
-  display: inline-block;
-  transform: skewX(20deg);
-}
-
-/* hover stays inverted but balanced */
-#collapseTagsBtn:hover {
-  background: #ffffff18;
-  border-color: #ffffff33;
-}
-
-/* remove focus glow that causes the bright pixel */
-#collapseTagsBtn:focus {
+/* Hover/focus: change background/border + text color */
+.header-actions .nav-slant-btn:hover,
+.header-actions .nav-slant-btn:focus {
+  transform: skewX(20deg) !important; /* explicitly cancel any inherited transform */
+  filter: none !important;
+  background-color: #e6e6e6c5; /* subtle lift without affecting text AA */
+  border-color: #555;
+  color: #111;
   outline: none;
-  box-shadow: 0 0 0 1px #ffffff11;
+}
+
+
+/* Sort Toggle Button */
+.sort-toggle-btn {
+  padding: 0.6rem 0.9rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #1a1a1a;
+  color: #fff;
+  cursor: pointer;
+  min-width: 130px;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+/* === ALWAYS SHOW TAGS ON COLLAB PAGE === */
+body.collab-page .tag-section,
+body.collab-page .tag-section.collapsed {
+  max-height: 1000px !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Wrap collapse + tags in one row */
+.tag-section {
+  padding-left: 6px; /* same padding as tag strip */
+  padding-right: 6px;
+}
+
+
+
+
+
+/* === Return to Cuudex Button (subpages) === */
+
+body:not(.index-page) .header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: auto;
+  align-items: flex-end;
+}
+
+body:not(.index-page) .header-actions .nav-slant-btn {
+  transform: skewX(20deg);
+  background: #dcdcdc;
+  border: 1px solid #555;
+  color: #222;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 0;
+  line-height: 1;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+  filter: none !important;
+}
+
+body:not(.index-page) .header-actions .nav-slant-btn > span {
+  transform: skewX(-20deg);
+  display: inline-block;
+  font-weight: 600;
+}
+
+body:not(.index-page) .header-actions .nav-slant-btn:hover,
+body:not(.index-page) .header-actions .nav-slant-btn:focus {
+  background-color: #e6e6e6c5;
+  border-color: #555;
+  color: #111;
+  outline: none;
 }

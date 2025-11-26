@@ -283,3 +283,13 @@ body {
     width: 90%;
   }
 }
+
+
+/* ===== HEADER ===== */
+.top-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+  flex-wrap: wrap;
+}

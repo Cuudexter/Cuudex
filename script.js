@@ -2,9 +2,17 @@
 const API_KEY = "AIzaSyD4P5R5ESGIeMbBsWFC37OBM6t_MKMJXQA";
 const CHANNEL_ID = "UCwkVDkOudIxhYMG61Jv8Tww";
 const TWITTER_USERNAME = "FeileacanCu";
-const MAX_RESULTS = 4000;
 
 // ==== UTILITIES ====
+
+if (document.body.classList.contains("collab-page")) {
+  window.IS_COLLAB_PAGE = true;
+  window.collapseStage = 0;   // 🔥 Always forced to expanded
+} else {
+  window.IS_COLLAB_PAGE = false;
+}
+
+let sortOrder = "newest"; // 🌍 GLOBAL sort order
 
 // Parse YouTube durations into minutes
 function parseDurationToMinutes(iso) {
@@ -158,21 +166,24 @@ function loadStreamTags() {
   return tagMap;
 }
 
-// Extract 11-char video ID from YouTube URL
-function extractVideoId(url) {
-  if (!url) return null;
-  const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return match ? match[1] : null;
+// validate 11-char link ID
+function extractVideoId(value) {
+  if (!value) return null;
+  const id = value.trim();
+  return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
 }
+
 
 // ==== TAG BUTTONS ====
 
-// Track 3-state tags
-let tagStates = {};
+let tagStates = {}; // three-state per tag
 
 function createTagButtons(tagNames) {
   const container = document.getElementById("tag-filters");
   if (!container) return;
+
+  // sort alphabetically to keep UI consistent
+  tagNames = [...tagNames].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
   container.innerHTML = "";
   tagStates = {};
@@ -232,14 +243,18 @@ function setupDualSlider(options) {
   minInput.value = sliderMin;
   maxInput.value = sliderMax;
 
-  function updateFill(minV, maxV) {
-    if (!rangeFill) return;
-    const range = Math.max(1, sliderMax - sliderMin);
-    const percentMin = ((minV - sliderMin) / range) * 100;
-    const percentMax = ((maxV - sliderMin) / range) * 100;
-    rangeFill.style.left = percentMin + "%";
-    rangeFill.style.width = Math.max(0, percentMax - percentMin) + "%";
-  }
+function updateFill(minV, maxV) {
+  if (!rangeFill) return;
+
+  const sliderMinVal = parseInt(minInput.min);
+  const sliderMaxVal = parseInt(maxInput.max);
+
+  const percentMin = ((minV - sliderMinVal) / (sliderMaxVal - sliderMinVal)) * 100;
+  const percentMax = ((maxV - sliderMinVal) / (sliderMaxVal - sliderMinVal)) * 100;
+
+  rangeFill.style.left = percentMin + "%";
+  rangeFill.style.width = (percentMax - percentMin) + "%";
+}
 
   const handleInput = () => {
     let minVal = parseInt(minInput.value);
@@ -262,12 +277,14 @@ function setupDualSlider(options) {
   maxInput.addEventListener("input", handleInput);
   window.addEventListener("resize", () => updateFill(parseInt(minInput.value), parseInt(maxInput.value)));
 
+  // initial call to set labels/fill
   handleInput();
 }
 
 // ==== STREAM DISPLAY & FILTERING ====
 
 let allStreams = [];
+let currentDurationType = "full"; // global single source of truth
 
 function displayStreams(streams) {
   const grid = document.getElementById("video-grid");
@@ -281,9 +298,9 @@ function displayStreams(streams) {
   grid.innerHTML = streams.map(s => {
     const isTagged = s.tags && Object.keys(s.tags).some(k => k && k !== "stream_link" && k !== "zatsu_start");
     const untaggedLabel = !isTagged ? `<span class="untagged-label">Untagged</span>` : "";
-    const d = new Date(s.date);
-    const options = { month: 'long', day: 'numeric' };
-    const formattedDate = d.toLocaleDateString('en-GB', options) + " '" + String(d.getFullYear()).slice(-2);
+
+    // Use currentDurationType for displayed duration if you want; we'll show full by default in card
+    const displayedDuration = s.durationMinutes || 0;
 
     return `
       <div class="video-card">
@@ -293,9 +310,9 @@ function displayStreams(streams) {
         <div class="video-info">
           <h3>${escapeHtml(s.title)}</h3>
           <div class="video-meta">
-            <p class="video-date">${formattedDate}</p>
+            <p class="video-date">${s.formattedDate}</p>
             ${untaggedLabel}
-            <p class="video-duration">${formatMinutesToHM(s.durationMinutes)}</p>
+            <p class="video-duration">${formatMinutesToHM(displayedDuration)}</p>
           </div>
         </div>
       </div>
@@ -313,12 +330,22 @@ function streamHasTagValue(stream, tagName) {
   return true;
 }
 
+function durationForStreamByMode(s) {
+  if (currentDurationType === "game") return s.gameDuration || 0;
+  if (currentDurationType === "zatsu") return s.zatsuDuration || 0;
+  return s.durationMinutes || 0;
+}
+
 // Filter streams based on search, duration, tags
 function filterAndSortStreams() {
   if (!allStreams?.length) return;
 
+  // === COLLAB PAGE FIX: never hide tag buttons ===
+  if (IS_COLLAB_PAGE) {
+    document.querySelectorAll("#tag-filters button").forEach(b => b.style.display = "");
+  }
+
   const searchTerm = (document.getElementById("searchInput")?.value || "").toLowerCase();
-  const sortOrder = document.getElementById("sortOrder")?.value || "newest";
   const minVal = parseInt(document.getElementById("durationMin")?.value || 0);
   const maxVal = parseInt(document.getElementById("durationMax")?.value || 9999);
 
@@ -326,9 +353,10 @@ function filterAndSortStreams() {
   const excludeTags = Object.entries(tagStates).filter(([_, v]) => v === "exclude").map(([k]) => k);
 
   const filtered = allStreams.filter(s => {
-    const duration = s.durationMinutes || 0;
+    const duration = durationForStreamByMode(s);
     const inDurationRange = duration >= minVal && duration <= maxVal;
-    const matchesText = s.title.toLowerCase().includes(searchTerm);
+    const matchesText = s.title.toLowerCase().includes(searchTerm) ||
+                        s.formattedDate.toLowerCase().includes(searchTerm);
     const hasIncluded = includeTags.every(t => streamHasTagValue(s, t));
     const hasExcluded = excludeTags.some(t => streamHasTagValue(s, t));
 
@@ -338,28 +366,29 @@ function filterAndSortStreams() {
   filtered.sort((a, b) => {
     switch (sortOrder) {
       case "oldest": return new Date(a.date) - new Date(b.date);
-      case "shortest": return a.durationMinutes - b.durationMinutes;
-      case "longest": return b.durationMinutes - a.durationMinutes;
+      case "shortest": return durationForStreamByMode(a) - durationForStreamByMode(b);
+      case "longest": return durationForStreamByMode(b) - durationForStreamByMode(a);
       default: return new Date(b.date) - new Date(a.date);
     }
   });
 
-    // Update stream count display
-    const countEl = document.getElementById("streamCount");
-    if (countEl) {
-      countEl.textContent = `Showing ${filtered.length} stream${filtered.length === 1 ? "" : "s"}`;
-    }
-
+  // Update stream count display
+  const countEl = document.getElementById("streamCount");
+  if (countEl) {
+    countEl.textContent = `Showing ${filtered.length} stream${filtered.length === 1 ? "" : "s"}`;
+  }
 
   displayStreams(filtered);
 }
 
 // ==== MAIN INITIALIZATION ====
+
 async function initMainPage() {
   try {
     const playlistId = await getChannelDetails();
     if (!playlistId) {
-      document.getElementById("video-grid").innerHTML = "<p style='text-align:center;color:#aaa;'>Channel not found.</p>";
+      const vg = document.getElementById("video-grid");
+      if (vg) vg.innerHTML = "<p style='text-align:center;color:#aaa;'>Channel not found.</p>";
       return;
     }
 
@@ -367,26 +396,31 @@ async function initMainPage() {
     const fetched = await getVideosFromPlaylist(playlistId);
 
     const sample = Object.keys(Object.values(tagMap)[0] || {});
-    const tagNames = sample.filter(t => !["stream_link", "zatsu_start", "zatsuStartMinutes"].includes(t));
+    const tagNames = sample.filter(t => !["stream_link","stream_title", "zatsu_start", "zatsuStartMinutes"].includes(t));
     createTagButtons(tagNames);
 
     allStreams = fetched.map(s => {
       const tags = tagMap[s.id] || {};
       const zatsuStart = tags.zatsuStartMinutes || 0;
       const total = s.durationMinutes || 0;
+
+      const d = new Date(s.date);
+      const options = { month: 'long', day: 'numeric' };
+      const formattedDate = d.toLocaleDateString('en-GB', options) + " '" + String(d.getFullYear()).slice(-2);
+
       return {
         ...s,
         tags,
         zatsuStartMinutes: zatsuStart,
         zatsuDuration: Math.max(0, total - zatsuStart),
         gameDuration: Math.max(0, zatsuStart),
+        formattedDate, 
       };
     });
 
-    // Slider setup
-    let currentDurationType = "full";
-    let currentMinVal = 0;
-    let currentMaxVal = Math.max(30, Math.ceil(Math.max(...allStreams.map(s => s.durationMinutes))));
+
+    // Slider setup: compute the default max for "full" mode
+    let currentMaxVal = Math.max(30, Math.ceil(Math.max(...allStreams.map(s => s.durationMinutes || 0))));
 
     setupDualSlider({
       minId: "durationMin",
@@ -407,11 +441,83 @@ async function initMainPage() {
     document.getElementById("searchInput")?.addEventListener("input", filterAndSortStreams);
     document.getElementById("sortOrder")?.addEventListener("change", filterAndSortStreams);
 
+    const sortToggle = document.getElementById("sortToggle");
+
+    if (sortToggle) {
+      sortToggle.addEventListener("click", () => {
+        sortOrder = (sortOrder === "newest") ? "oldest" : "newest";
+        sortToggle.textContent = sortOrder === "newest"
+          ? "Newest First ▾"
+          : "Oldest First ▴";
+
+        filterAndSortStreams();
+      });
+}
+
+
+    // === Duration Mode Buttons: update mode + recalc slider bounds & visuals ===
+    const modeButtons = document.querySelectorAll(".mode-btn");
+    modeButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        modeButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        // set global mode
+        currentDurationType = btn.dataset.mode || "full";
+
+        // Recompute the max for this mode
+        const maxForMode = Math.max(1, Math.ceil(Math.max(...allStreams.map(s => {
+          if (currentDurationType === "game") return s.gameDuration || 0;
+          if (currentDurationType === "zatsu") return s.zatsuDuration || 0;
+          return s.durationMinutes || 0;
+        }))));
+
+        // Update slider bounds safely (only if elements exist)
+        const minEl = document.getElementById("durationMin");
+        const maxEl = document.getElementById("durationMax");
+        const fill = document.getElementById("durationRangeFill");
+        const minLbl = document.getElementById("durationMinLabel");
+        const maxLbl = document.getElementById("durationMaxLabel");
+
+        if (minEl && maxEl) {
+          // update max attributes
+          minEl.max = maxForMode;
+          maxEl.max = maxForMode;
+
+          // clamp values if necessary
+          if (parseInt(maxEl.value) > maxForMode) maxEl.value = maxForMode;
+          if (parseInt(minEl.value) >= parseInt(maxEl.value)) {
+            minEl.value = Math.max(0, parseInt(maxEl.value) - 1);
+          }
+
+          // recalc fill & labels
+          const sliderMin = parseFloat(minEl.min);
+          const sliderMax = parseFloat(maxEl.max);
+          const range = Math.max(1, sliderMax - sliderMin);
+          const newMin = parseInt(minEl.value);
+          const newMax = parseInt(maxEl.value);
+          if (fill) {
+            const percentMin = ((newMin - sliderMin) / range) * 100;
+            const percentMax = ((newMax - sliderMin) / range) * 100;
+            fill.style.left = percentMin + "%";
+            fill.style.width = Math.max(0, percentMax - percentMin) + "%";
+          }
+          if (minLbl) minLbl.textContent = formatMinutesShort(newMin);
+          if (maxLbl) maxLbl.textContent = formatMinutesShort(newMax);
+        }
+
+        // Re-run filtering
+        filterAndSortStreams();
+      });
+    });
+
+    // Initial render & filter
     filterAndSortStreams();
 
   } catch (err) {
     console.error("[Init] Error:", err);
-    document.getElementById("video-grid").innerHTML =
+    const vg = document.getElementById("video-grid");
+    if (vg) vg.innerHTML =
       "<p style='text-align:center;color:#aaa;'>Error loading data.</p>";
   }
 }
@@ -429,24 +535,75 @@ document.getElementById("suggestTagBtn")?.addEventListener("click", () => {
   window.location.href = "suggest.html";
 });
 
-// === TAG COLLAPSE TOGGLE (INLINE BUTTON) ===
+// === TAG COLLAPSE TOGGLE (3-STAGE) ===
 const collapseBtn = document.getElementById("collapseTagsBtn");
 const tagFilterContainer = document.getElementById("tag-filters");
 
-let tagsCollapsed = false;
+let collapseStage = 0; // 0 = all visible, 1 = only included/excluded shown, 2 = none shown
 
-collapseBtn?.addEventListener("click", () => {
-  tagsCollapsed = !tagsCollapsed;
+function hasActiveFilters() {
+  return Object.values(tagStates).some(v => v === "include" || v === "exclude");
+}
 
-  // get the <span> that holds the text so the skew stays correct
-  const label = collapseBtn.querySelector("span");
+function applyTagCollapseState() {
 
-  if (tagsCollapsed) {
-    tagFilterContainer.style.display = "none";
-    if (label) label.textContent = "Expand ▸";
-  } else {
-    tagFilterContainer.style.display = "flex";
-    if (label) label.textContent = "Collapse ◂";
+  // COLLAP PAGE: tags should ALWAYS show
+  if (IS_COLLAB_PAGE) {
+    document.querySelectorAll("#tag-filters button").forEach(b => b.style.display = "");
+    return;
   }
-});
+
+  // MAIN PAGE ─ before clicking collapse button:
+  // ALWAYS show tags normally (no hiding yet)
+  if (!collapseClickedOnce) {
+    document.querySelectorAll("#tag-filters button").forEach(b => (b.style.display = ""));
+    if (collapseBtn) collapseBtn.querySelector("span").textContent = "Collapse ◂";
+    return;
+  }
+
+  // 🌐 MAIN PAGE collapse logic only AFTER a click:
+  const buttons = document.querySelectorAll("#tag-filters button");
+  if (!collapseBtn) return;
+
+  if (collapseStage === 0) {
+    buttons.forEach(b => b.style.display = "");
+    collapseBtn.querySelector("span").textContent = "Collapse ◂";
+
+  } else if (collapseStage === 1) {
+    buttons.forEach(b => {
+      const name = b.textContent.trim();
+      const s = tagStates[name];
+      b.style.display = (s === "include" || s === "exclude") ? "" : "none";
+    });
+    collapseBtn.querySelector("span").textContent = "Collapse ALL ◂";
+
+  } else {
+    buttons.forEach(b => b.style.display = "none");
+    collapseBtn.querySelector("span").textContent = "Expand Tags ▸";
+  }
+}
+
+
+let collapseClickedOnce = false;
+
+if (collapseBtn) {
+  collapseBtn.addEventListener("click", () => {
+    collapseClickedOnce = true;  // mark that user has interacted
+
+    if (IS_COLLAB_PAGE) return;
+
+    // If there are no included/excluded tags, skip mid stage
+    if (!hasActiveFilters()) {
+      collapseStage = (collapseStage === 0) ? 2 : 0;
+    } else {
+      collapseStage = (collapseStage + 1) % 3;
+    }
+
+    applyTagCollapseState();
+  });
+}
+
+
+// initialize label/visual to match current state on load
+if (!IS_COLLAB_PAGE) applyTagCollapseState();
 
