@@ -368,10 +368,14 @@ async function initCollabsPage() {
         }
       });
     }
+
+    const maxDur = Math.ceil(
+      Math.max(...allCollabStreams.map(s => s.durationMinutes))
+    );
+    setupDurationSlider(maxDur);
  
     // Add manual tag: true if imported from metadata.csv
     tags["Cuu Stream"] = csvRow ? "" : "Yes";
-
 
     // Friend count logic:
     // - Base CSV uses friend_count column
@@ -410,10 +414,6 @@ async function initCollabsPage() {
 
   createTagButtons(tagNames);
 
-  const maxDur = Math.ceil(
-    Math.max(...allCollabStreams.map(s => s.durationMinutes))
-  );
-  setupDurationSlider(maxDur);
 
   document
     .getElementById("searchInput")
