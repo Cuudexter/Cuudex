@@ -369,7 +369,23 @@ async function initCollabsPage() {
       });
     }
 
-    const friendCount = csvRow?.friend_count ?? "1";
+// Add manual tag: true if imported from metadata.csv
+tags["Cuu Stream"] = csvRow ? "false" : "true";
+
+
+    // Friend count logic:
+    // - Base CSV uses friend_count column
+    // - Extra CSV uses the Collab numeric value
+    let friendCount;
+    if (csvRow) {
+      friendCount = parseFloat(csvRow.friend_count) || 1;
+    } else {
+      // from metadata.csv
+      friendCount = parseFloat(
+        extraRows.find(r => extractVideoId(r.stream_link) === s.id)?.Collab
+      ) || 1;
+    }
+
 
     const d = new Date(s.date);
     const formattedDate =
@@ -385,9 +401,12 @@ async function initCollabsPage() {
   });
 
   // ------- UI Setup -------
-  const tagNames = Object.keys(csv[0]).filter(
-    k => k !== "stream_link" && k !== "friend_count"
-  );
+    let tagNames = Object.keys(csv[0]).filter(
+      k => k !== "stream_link" && k !== "friend_count"
+    );
+
+    // Add manual tag "Cuu Stream"
+    tagNames.push("Cuu Stream");
 
   createTagButtons(tagNames);
 
