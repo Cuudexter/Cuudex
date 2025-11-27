@@ -368,9 +368,9 @@ async function initCollabsPage() {
         }
       });
     }
-
-// Add manual tag: true if imported from metadata.csv
-tags["Cuu Stream"] = csvRow ? "false" : "true";
+ 
+    // Add manual tag: true if imported from metadata.csv
+    tags["Cuu Stream"] = csvRow ? "" : "Yes";
 
 
     // Friend count logic:
