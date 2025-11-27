@@ -1,15 +1,16 @@
 // ============== UTILITIES ===============
 
 if (document.body.classList.contains("collab-page")) {
+  // Disable main page tag logic on collab page
   window.tagStates = undefined;
   window.applyTagCollapseState = () => {};
 }
 
-function extractVideoId(url) {
-  if (!url) return null;
-  const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return match ? match[1] : null;
+function extractVideoId(val) {
+  if (!val) return null;
+  return /^[a-zA-Z0-9_-]{11}$/.test(val) ? val : null;
 }
+
 
 function parseDurationToMinutes(iso) {
   const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
@@ -39,9 +40,11 @@ function formatMinutesToHM(mins) {
 function loadCollabCSV() {
   const el = document.getElementById("collabs");
   if (!el) return [];
+
   const lines = el.textContent.trim().split("\n").filter(x => x.trim());
   const headers = lines[0].split(",");
   const rows = lines.slice(1);
+
   return rows.map(r => {
     const cols = r.split(",");
     const obj = {};
@@ -50,19 +53,21 @@ function loadCollabCSV() {
   });
 }
 
-function loadMetadataCSV() {
-  const el = document.getElementById("metadata");
-  if (!el) return [];
-  const lines = el.textContent.trim().split("\n").filter(x => x.trim());
+async function loadExtraCSV(url) {
+  const res = await fetch(url);
+  const text = await res.text();
+
+  const lines = text.trim().split("\n").filter(x => x.trim());
   const headers = lines[0].split(",");
-  const rows = lines.slice(1);
-  return rows.map(r => {
+
+  return lines.slice(1).map(r => {
     const cols = r.split(",");
     const obj = {};
     headers.forEach((h, i) => (obj[h.trim()] = (cols[i] || "").trim()));
     return obj;
-  }).filter(r => parseFloat(r.Collab || 0) > 0); // Only Collab>0
+  });
 }
+
 
 // ================ TAG UI =================
 
@@ -71,23 +76,31 @@ let collabTagStates = {};
 function createTagButtons(tagNames) {
   const container = document.getElementById("tag-filters");
   if (!container) return;
+
+  // Do not rebuild if tags already exist
   if (container.querySelector(".tag-btn")) return;
 
   tagNames.forEach(tag => {
     collabTagStates[tag] = "none";
+
     const btn = document.createElement("button");
     btn.className = "tag-btn";
     btn.innerHTML = `<span>${tag}</span>`;
+
     btn.addEventListener("click", () => {
       const next = { none: "include", include: "exclude", exclude: "none" }[
         collabTagStates[tag]
       ];
+
       collabTagStates[tag] = next;
+
       btn.classList.remove("include", "exclude");
       if (next === "include") btn.classList.add("include");
       if (next === "exclude") btn.classList.add("exclude");
+
       filterAndSortStreams();
     });
+
     container.appendChild(btn);
   });
 }
@@ -97,7 +110,8 @@ function createTagButtons(tagNames) {
 const minSlider = document.getElementById("durationMin");
 const maxSlider = document.getElementById("durationMax");
 const fillBar =
-  document.getElementById("durationRangeFill") || document.getElementById("rangeFill");
+  document.getElementById("durationRangeFill") ||
+  document.getElementById("rangeFill");
 
 function formatTimeForSlider(mins) {
   if (mins >= 360) return "6:00+";
@@ -110,27 +124,38 @@ function setupDurationSlider(maxVal) {
   minSlider.min = maxSlider.min = 0;
   minSlider.max = maxSlider.max = maxVal;
   minSlider.step = maxSlider.step = 1;
+
   minSlider.value = 0;
   maxSlider.value = maxVal;
+
   updateDurationSliderUI();
 }
 
 function updateDurationSliderUI(event) {
   let minVal = parseInt(minSlider.value);
   let maxVal = parseInt(maxSlider.value);
+
+  // Prevent slider crossing
   if (minVal > maxVal) {
     if (event?.target === minSlider) maxSlider.value = minVal;
     else minSlider.value = maxVal;
     minVal = parseInt(minSlider.value);
     maxVal = parseInt(maxSlider.value);
   }
-  document.getElementById("durationMinLabel").textContent = formatTimeForSlider(minVal);
-  document.getElementById("durationMaxLabel").textContent = formatTimeForSlider(maxVal);
+
+  // Update labels
+  document.getElementById("durationMinLabel").textContent =
+    formatTimeForSlider(minVal);
+  document.getElementById("durationMaxLabel").textContent =
+    formatTimeForSlider(maxVal);
+
+  // Update fill bar
   const range = maxSlider.max - minSlider.min;
   const left = ((minVal - minSlider.min) / range) * 100;
   const right = ((maxVal - minSlider.min) / range) * 100;
   fillBar.style.left = left + "%";
   fillBar.style.width = right - left + "%";
+
   filterAndSortStreams();
 }
 
@@ -150,19 +175,25 @@ function formatFriendLabel(n) {
 function updateFriendSliderUI(event) {
   let minVal = parseInt(friendMin.value);
   let maxVal = parseInt(friendMax.value);
+
   if (minVal > maxVal) {
     if (event?.target === friendMin) friendMax.value = minVal;
     else friendMin.value = maxVal;
     minVal = parseInt(friendMin.value);
     maxVal = parseInt(friendMax.value);
   }
-  document.getElementById("friendMinLabel").textContent = formatFriendLabel(minVal);
-  document.getElementById("friendMaxLabel").textContent = formatFriendLabel(maxVal);
+
+  document.getElementById("friendMinLabel").textContent =
+    formatFriendLabel(minVal);
+  document.getElementById("friendMaxLabel").textContent =
+    formatFriendLabel(maxVal);
+
   const range = friendMax.max - friendMin.min;
   const left = ((minVal - friendMin.min) / range) * 100;
   const right = ((maxVal - friendMin.min) / range) * 100;
   friendFill.style.left = left + "%";
   friendFill.style.width = right - left + "%";
+
   filterAndSortStreams();
 }
 
@@ -176,14 +207,18 @@ let allCollabStreams = [];
 async function fetchVideoData(ids) {
   const chunks = [];
   for (let i = 0; i < ids.length; i += 50) chunks.push(ids.slice(i, i + 50));
+
   let results = [];
   for (const c of chunks) {
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${c.join(",")}&key=${API_KEY}`;
+    const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${c.join(
+      ","
+    )}&key=${API_KEY}`;
     const res = await fetch(url);
     const data = await res.json();
     results.push(...(data.items || []));
     await new Promise(r => setTimeout(r, 150));
   }
+
   return results.map(v => ({
     id: v.id,
     title: v.snippet.title,
@@ -192,6 +227,7 @@ async function fetchVideoData(ids) {
     thumbnail: v.snippet.thumbnails?.high?.url || "",
     channel_name: v.snippet.channelTitle
   }));
+
 }
 
 // ============ DISPLAY + FILTER ==========
@@ -199,23 +235,30 @@ async function fetchVideoData(ids) {
 function displayStreams(list) {
   const grid = document.getElementById("video-grid");
   if (!grid) return;
+
   if (!list.length) {
-    grid.innerHTML = "<p style='text-align:center;color:#aaa;'>No streams found.</p>";
+    grid.innerHTML =
+      "<p style='text-align:center;color:#aaa;'>No streams found.</p>";
     return;
   }
-  grid.innerHTML = list.map(s => `
-    <div class="video-card">
-      <a href="https://youtu.be/${s.id}" target="_blank" class="thumb-link">
-        <img src="${s.thumbnail}" alt="${escapeHtml(s.title)}" loading="lazy">
-      </a>
-      <div class="video-info">
-        <h3>${escapeHtml(s.title)}</h3>
-        <div class="video-meta">
-          <p class="video-date">${s.formattedDate}</p>
-          <p class="video-duration">${formatMinutesToHM(s.durationMinutes)}</p>
+
+  grid.innerHTML = list
+    .map(s => {
+      return `
+      <div class="video-card">
+        <a href="https://youtu.be/${s.id}" target="_blank" class="thumb-link">
+          <img src="${s.thumbnail}" alt="${escapeHtml(s.title)}" loading="lazy">
+        </a>
+        <div class="video-info">
+          <h3>${escapeHtml(s.title)}</h3>
+          <div class="video-meta">
+            <p class="video-date">${s.formattedDate}</p>
+            <p class="video-duration">${formatMinutesToHM(s.durationMinutes)}</p>
+          </div>
         </div>
-      </div>
-    </div>`).join("");
+      </div>`;
+    })
+    .join("");
 }
 
 function streamHasTag(stream, tag) {
@@ -225,26 +268,59 @@ function streamHasTag(stream, tag) {
 }
 
 function filterAndSortStreams() {
-  const search = (document.getElementById("searchInput")?.value || "").toLowerCase();
+  const search =
+    (document.getElementById("searchInput")?.value || "").toLowerCase();
   const min = parseInt(document.getElementById("durationMin")?.value || 0);
   const max = parseInt(document.getElementById("durationMax")?.value || 9999);
+
   const sort = collabSortOrder;
-  const includeTags = Object.entries(collabTagStates).filter(([_, v]) => v === "include").map(([k]) => k);
-  const excludeTags = Object.entries(collabTagStates).filter(([_, v]) => v === "exclude").map(([k]) => k);
+
+  const includeTags = Object.entries(collabTagStates)
+    .filter(([_, v]) => v === "include")
+    .map(([k]) => k);
+
+  const excludeTags = Object.entries(collabTagStates)
+    .filter(([_, v]) => v === "exclude")
+    .map(([k]) => k);
+
   const minFriends = parseInt(friendMin?.value || 1);
   const maxFriends = parseInt(friendMax?.value || 10);
 
   const filtered = allCollabStreams.filter(s => {
-    const matchesDuration = s.durationMinutes >= min && s.durationMinutes <= max;
-    const matchesText = s.title.toLowerCase().includes(search) || (s.channel_name || "").toLowerCase().includes(search) || s.formattedDate.toLowerCase().includes(search);
+    const matchesDuration =
+      s.durationMinutes >= min && s.durationMinutes <= max;
+    const matchesText =
+      s.title.toLowerCase().includes(search) ||
+      (s.channel_name || "").toLowerCase().includes(search) ||
+      s.formattedDate.toLowerCase().includes(search);
+
+
     const hasIncluded = includeTags.every(t => streamHasTag(s, t));
     const hasExcluded = excludeTags.some(t => streamHasTag(s, t));
-    const friends = parseFloat(s.friend_count || 1);
-    return matchesDuration && matchesText && hasIncluded && !hasExcluded && friends >= minFriends && friends <= maxFriends;
+
+    const friends = parseInt(s.friend_count || 1);
+
+    return (
+      matchesDuration &&
+      matchesText &&
+      hasIncluded &&
+      !hasExcluded &&
+      friends >= minFriends &&
+      friends <= maxFriends
+    );
   });
 
-  filtered.sort((a,b) => sort === "oldest" ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date));
-  document.getElementById("streamCount").textContent = `Showing ${filtered.length} stream${filtered.length === 1 ? "" : "s"}`;
+  filtered.sort((a, b) => {
+    if (sort === "oldest") return new Date(a.date) - new Date(b.date);
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  document.getElementById(
+    "streamCount"
+  ).textContent = `Showing ${filtered.length} stream${
+    filtered.length === 1 ? "" : "s"
+  }`;
+
   displayStreams(filtered);
 }
 
@@ -255,48 +331,74 @@ let collabSortOrder = "newest";
 // ================ INIT ==================
 
 async function initCollabsPage() {
-  const collabCSV = loadCollabCSV();
-  const metadataCSV = loadMetadataCSV();
+  const csv = loadCollabCSV();
+  const baseIds = csv.map(r => extractVideoId(r.stream_link)).filter(Boolean);
 
-  const allRows = [...collabCSV];
+  // -------- Load external metadata.csv --------
+  let extraRows = [];
+  try {
+    extraRows = await loadExtraCSV("metadata.csv");
+  } catch (e) {
+    console.warn("[Collabs] Could not load metadata.csv", e);
+  }
 
-  // Add streams from metadata.csv only if Collab >0
-  allRows.push(...metadataCSV);
+  // Filter rows where Collab > 0 and valid ID
+  const extraIds = extraRows
+    .filter(r => parseFloat(r.Collab) > 0)
+    .map(r => extractVideoId(r.stream_link))
+    .filter(Boolean);
 
-  const ids = allRows.map(r => extractVideoId(r.stream_link)).filter(x => x);
+  // ------- Merge, dedupe --------
+  const ids = [...new Set([...baseIds, ...extraIds])];
+
+  // ------- Fetch metadata from YouTube -------
   const data = await fetchVideoData(ids);
 
-  allCollabStreams = data.map((s, i) => {
-    const row = allRows[i];
-    const tagObject = {};
-    Object.keys(row).forEach(k => {
-      if (k !== "stream_link" && k !== "friend_count" && k !== "Collab") {
-        tagObject[k] = row[k].trim();
-      }
-    });
-    // Add "Home" tag
-    tagObject.Home = true;
+  // ------- Combine into unified objects -------
+  allCollabStreams = data.map(s => {
+    // Try to match the original collabs CSV
+    const idx = baseIds.indexOf(s.id);
+    const csvRow = idx >= 0 ? csv[idx] : null;
+
+    const tags = {};
+    if (csvRow) {
+      Object.keys(csvRow).forEach(k => {
+        if (k !== "stream_link" && k !== "friend_count") {
+          tags[k] = csvRow[k].trim();
+        }
+      });
+    }
+
+    const friendCount = csvRow?.friend_count ?? "1";
 
     const d = new Date(s.date);
-    const formattedDate = d.toLocaleDateString("en-GB", { month:'long', day:'numeric'}) + " '" + String(d.getFullYear()).slice(-2);
+    const formattedDate =
+      d.toLocaleDateString("en-GB", { month: "long", day: "numeric" }) +
+      " '" + String(d.getFullYear()).slice(-2);
 
-    // friend_count: for metadata.csv, use Collab value; else keep original friend_count if exists
-    const friends = parseFloat(row.Collab || row.friend_count || 1);
-
-    return { ...s, friend_count: friends, tags: tagObject, formattedDate };
+    return {
+      ...s,
+      tags,
+      friend_count: friendCount,
+      formattedDate
+    };
   });
 
-  const tagNames = Array.from(new Set([
-    ...Object.keys(allRows[0] || {}).filter(k => k !== "stream_link" && k !== "friend_count" && k !== "Collab"),
-    "Home"
-  ]));
+  // ------- UI Setup -------
+  const tagNames = Object.keys(csv[0]).filter(
+    k => k !== "stream_link" && k !== "friend_count"
+  );
 
   createTagButtons(tagNames);
 
-  const maxDur = Math.ceil(Math.max(...allCollabStreams.map(s => s.durationMinutes)));
+  const maxDur = Math.ceil(
+    Math.max(...allCollabStreams.map(s => s.durationMinutes))
+  );
   setupDurationSlider(maxDur);
 
-  document.getElementById("searchInput")?.addEventListener("input", filterAndSortStreams);
+  document
+    .getElementById("searchInput")
+    ?.addEventListener("input", filterAndSortStreams);
 
   filterAndSortStreams();
 }
@@ -311,11 +413,15 @@ document.addEventListener("DOMContentLoaded", () => {
   if (toggle) {
     toggle.addEventListener("click", () => {
       collabSortOrder = collabSortOrder === "newest" ? "oldest" : "newest";
-      toggle.textContent = collabSortOrder === "newest" ? "Newest First ▾" : "Oldest First ▴";
+      toggle.textContent =
+        collabSortOrder === "newest"
+          ? "Newest First ▾"
+          : "Oldest First ▴";
       toggle.classList.toggle("active", collabSortOrder === "oldest");
       filterAndSortStreams();
     });
   }
+
   console.log("[Collabs] Initializing...");
   initCollabsPage();
 });
