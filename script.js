@@ -523,11 +523,11 @@ async function initMainPage() {
 }
 
 // Conditional page init
-if (!window.location.pathname.includes("suggest")) {
-  console.log("[Main] Initializing main UI...");
+if (!window.IS_COLLAB_PAGE && !window.location.pathname.includes("suggest")) {
+  console.log("[Main] Initializing Main UI...");
   initMainPage();
 } else {
-  console.log("[Suggest] Suggest Tag page detected — skipping main init.");
+  console.log("[Main] Skipping Main UI (Collab/Suggest Page)");
 }
 
 // Suggest Tag button
