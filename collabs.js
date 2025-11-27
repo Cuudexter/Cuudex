@@ -114,22 +114,22 @@ const fillBar =
   document.getElementById("rangeFill");
 
 function formatTimeForSlider(mins) {
-  if (mins >= 360) return "6:00+";
+  if (mins >= 999) return "999";
   const h = Math.floor(mins / 60);
   const m = Math.floor(mins % 60);
   return `${h}:${m.toString().padStart(2, "0")}`;
 }
 
 function setupDurationSlider(maxVal) {
-  minSlider.min = maxSlider.min = 0;
-  minSlider.max = maxSlider.max = maxVal;
+  if (!minSlider || !maxSlider) return;
   minSlider.step = maxSlider.step = 1;
 
-  minSlider.value = 0;
-  maxSlider.value = maxVal;
+  minSlider.max = maxVal;
+  maxSlider.max = maxVal;
 
   updateDurationSliderUI();
 }
+
 
 function updateDurationSliderUI(event) {
   let minVal = parseInt(minSlider.value);
@@ -372,6 +372,7 @@ async function initCollabsPage() {
     // Add manual tag: true if imported from metadata.csv
     tags["Cuu Stream"] = csvRow ? "" : "Yes";
 
+
     // Friend count logic:
     // - Base CSV uses friend_count column
     // - Extra CSV uses the Collab numeric value
@@ -399,19 +400,6 @@ async function initCollabsPage() {
     };
   });
 
-
-    const maxDur = Math.max(...allCollabStreams.map(s => s.durationMinutes));
-
-    // Just overwrite the max + current value after main script set them
-    durationMax.max = maxDur;
-    durationMax.value = maxDur;
-
-    // Update the label using your existing function
-    document.getElementById("durationMaxLabel").textContent =
-      formatMinutesToHM(maxDur) + "+";
-
-    setupDurationSlider(maxDur);
-
   // ------- UI Setup -------
     let tagNames = Object.keys(csv[0]).filter(
       k => k !== "stream_link" && k !== "friend_count"
@@ -421,6 +409,12 @@ async function initCollabsPage() {
     tagNames.push("Cuu Stream");
 
   createTagButtons(tagNames);
+
+const maxDur = Math.ceil(
+  Math.max(...allCollabStreams.map(s => s.durationMinutes))
+);
+
+setupDurationSlider(maxDur);
 
 
   document
