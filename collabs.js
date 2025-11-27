@@ -400,9 +400,16 @@ async function initCollabsPage() {
   });
 
 
-  const maxDur = Math.ceil(
-      Math.max(...allCollabStreams.map(s => s.durationMinutes))
-    );
+    const maxDur = Math.max(...allCollabStreams.map(s => s.durationMinutes));
+
+    // Just overwrite the max + current value after main script set them
+    durationMax.max = maxDur;
+    durationMax.value = maxDur;
+
+    // Update the label using your existing function
+    document.getElementById("durationMaxLabel").textContent =
+      formatMinutesToHM(maxDur) + "+";
+
     setupDurationSlider(maxDur);
 
   // ------- UI Setup -------
