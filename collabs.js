@@ -368,11 +368,6 @@ async function initCollabsPage() {
         }
       });
     }
-
-    const maxDur = Math.ceil(
-      Math.max(...allCollabStreams.map(s => s.durationMinutes))
-    );
-    setupDurationSlider(maxDur);
  
     // Add manual tag: true if imported from metadata.csv
     tags["Cuu Stream"] = csvRow ? "" : "Yes";
@@ -404,6 +399,12 @@ async function initCollabsPage() {
     };
   });
 
+
+  const maxDur = Math.ceil(
+      Math.max(...allCollabStreams.map(s => s.durationMinutes))
+    );
+    setupDurationSlider(maxDur);
+
   // ------- UI Setup -------
     let tagNames = Object.keys(csv[0]).filter(
       k => k !== "stream_link" && k !== "friend_count"
@@ -424,7 +425,6 @@ async function initCollabsPage() {
 
 window.addEventListener("load", () => {
   updateFriendSliderUI();
-  updateDurationSliderUI();
 });
 
 document.addEventListener("DOMContentLoaded", () => {
