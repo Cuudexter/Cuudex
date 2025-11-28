@@ -399,6 +399,49 @@ async function initMainPage() {
     const tagNames = sample.filter(t => !["stream_link","stream_title", "zatsu_start", "zatsuStartMinutes"].includes(t));
     createTagButtons(tagNames);
 
+createTagButtons(tagNames);
+
+// ------------------------------
+// GLUE COLLAPSE BUTTON TO FIRST TAG WITHOUT AFFECTING BUTTON SHAPE
+(function glueCollapseToFirstTag() {
+  const section = document.querySelector(".tag-section");
+  const collapseBtn = document.getElementById("collapseTagsBtn");
+  const tagFilters = document.getElementById("tag-filters");
+  if (!section || !collapseBtn || !tagFilters) return;
+
+  // wrap collapse + first tag in inline-flex container
+  let firstRowWrapper = section.querySelector(".collapse-first-row");
+  if (!firstRowWrapper) {
+    firstRowWrapper = document.createElement("div");
+    firstRowWrapper.className = "collapse-first-row";
+    firstRowWrapper.style.display = "inline-flex";
+    firstRowWrapper.style.alignItems = "center";
+    firstRowWrapper.style.gap = "0.5rem";
+    section.insertBefore(firstRowWrapper, tagFilters);
+    firstRowWrapper.appendChild(collapseBtn);
+  }
+
+  // move first tag into firstRowWrapper
+  const moveFirstTag = () => {
+    const firstTag = tagFilters.querySelector(".tag-btn");
+    if (firstTag && firstTag.parentElement !== firstRowWrapper) {
+      firstRowWrapper.appendChild(firstTag);
+    }
+  };
+
+  moveFirstTag();
+
+  // Observe changes (optional, helps on zoom/layout shifts)
+  const ro = new ResizeObserver(() => requestAnimationFrame(moveFirstTag));
+  ro.observe(section);
+  ro.observe(tagFilters);
+})();
+
+
+
+
+
+
     allStreams = fetched.map(s => {
       const tags = tagMap[s.id] || {};
       const zatsuStart = tags.zatsuStartMinutes || 0;
@@ -546,29 +589,17 @@ function hasActiveFilters() {
 }
 
 function applyTagCollapseState() {
+  const section = document.querySelector(".tag-section");
+  if (!section || !collapseBtn) return;
 
-  // COLLAP PAGE: tags should ALWAYS show
-  if (IS_COLLAB_PAGE) {
-    document.querySelectorAll("#tag-filters button").forEach(b => b.style.display = "");
-    return;
-  }
+  // select ALL tag buttons inside the section, regardless of wrapper
+  const buttons = section.querySelectorAll(".tag-btn");
+  if (!buttons.length) return;
 
-  // MAIN PAGE ─ before clicking collapse button:
-  // ALWAYS show tags normally (no hiding yet)
-  if (!collapseClickedOnce) {
-    document.querySelectorAll("#tag-filters button").forEach(b => (b.style.display = ""));
-    if (collapseBtn) collapseBtn.querySelector("span").textContent = "Collapse ◂";
-    return;
-  }
-
-  // 🌐 MAIN PAGE collapse logic only AFTER a click:
-  const buttons = document.querySelectorAll("#tag-filters button");
-  if (!collapseBtn) return;
-
+  // collapse logic
   if (collapseStage === 0) {
     buttons.forEach(b => b.style.display = "");
     collapseBtn.querySelector("span").textContent = "Collapse ◂";
-
   } else if (collapseStage === 1) {
     buttons.forEach(b => {
       const name = b.textContent.trim();
@@ -576,12 +607,18 @@ function applyTagCollapseState() {
       b.style.display = (s === "include" || s === "exclude") ? "" : "none";
     });
     collapseBtn.querySelector("span").textContent = "Collapse ALL ◂";
-
-  } else {
+  } else { // stage 2
     buttons.forEach(b => b.style.display = "none");
     collapseBtn.querySelector("span").textContent = "Expand Tags ▸";
   }
 }
+
+
+// Initialize collapse stage properly on load
+collapseStage = 0; // ensure starts expanded
+applyTagCollapseState(); // render initial state
+
+
 
 
 let collapseClickedOnce = false;
