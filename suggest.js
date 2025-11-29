@@ -3,6 +3,39 @@
 document.addEventListener("DOMContentLoaded", initSuggest);
 console.log("In suggest.js, emailjs is:", typeof emailjs);
 
+// ---- Robust CSV parser (handles quotes, empty columns, spacing) ----
+function parseCSV(csv) {
+  return csv
+    .trim()
+    .split("\n")
+    .map(line => {
+      const result = [];
+      let current = "";
+      let insideQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+          if (insideQuotes && line[i + 1] === '"') {
+            current += '"';  // escaped quote
+            i++;
+          } else {
+            insideQuotes = !insideQuotes;
+          }
+        } else if (char === "," && !insideQuotes) {
+          result.push(current.trim());
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+
+      result.push(current.trim());
+      return result;
+    });
+}
+
 async function initSuggest() {
   console.log("Suggest Tag page initializing...");
 
@@ -12,11 +45,9 @@ async function initSuggest() {
   const submit = document.getElementById("submitTag");
   const searchBox = document.getElementById("searchStreams");
 
-  let chosenTag = "";
   let existingTags = [];
-  let metadataRows = []; // full CSV data including existing tags
+  let metadataRows = [];
 
-  // Safety check
   if (!input || !list || !submit) {
     console.warn("Missing essential DOM elements on suggest.html — skipping setup.");
     return;
@@ -28,150 +59,142 @@ async function initSuggest() {
     const csvText = await res.text();
     metadataRows = parseCSV(csvText);
 
-    const header = metadataRows[0]; // first row
-    existingTags = header.slice(1, -2); // everything after stream_link up to before zatsu_start and stream_title
+    const header = metadataRows[0];
+
+    // structure:
+    // stream_link | tags... | zatsu_start | stream_title
+    existingTags = header.slice(1, -2);  // everything between stream_link and zatsu_start
 
     console.log("Loaded existing tags:", existingTags);
+
   } catch (err) {
-    console.error("Failed to load metadata.csv", err);
+    console.error("Failed to load metadata.csv:", err);
     alert("⚠️ Could not load stream data — suggestion cannot be sent.");
     return;
   }
 
-// --- Tag input behavior (desktop + mobile-friendly) ---
-function handleTagInput() {
-  const value = input.value.trim();
-  if (!value) return;
+  // --- Tag input behavior ---
+  function handleTagInput() {
+    const value = input.value.trim();
+    if (!value) return;
 
-  chosenTag = value;
-  input.blur();
-  input.classList.add("filled");
-  input.disabled = true;
-  showTagBanner(chosenTag);
-  submit.disabled = false;
-}
+    input.blur();
+    input.classList.add("filled");
+    input.disabled = true;
 
-// Trigger when user presses Enter (desktop)
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    handleTagInput();
+    showTagBanner(value);
+    submit.disabled = false;
   }
-});
 
-// Also trigger when input loses focus or "Done" on mobile
-input.addEventListener("change", handleTagInput);
-
-
-function showTagBanner(tagName) {
-  const tagBanner = document.getElementById("tagBanner");
-  const tagBannerText = document.getElementById("tagBannerText");
-  const changeBtn = document.getElementById("changeTagBtn");
-
-  tagBannerText.textContent = `Tagging "${tagName}"`;
-  tagBanner.classList.remove("hidden");
-
-  changeBtn.onclick = () => {
-    input.disabled = false;
-    input.focus();
-    input.classList.remove("filled");
-    tagBanner.classList.add("hidden");
-  };
-}
-
-// --- Search filter ---
-if (searchBox) {
-  searchBox.addEventListener("input", (e) => {
-    const query = e.target.value.toLowerCase();
-    document.querySelectorAll(".stream-item").forEach((item) => {
-      const title = item.querySelector("span").textContent.toLowerCase();
-      item.style.display = title.includes(query) ? "" : "none";
-    });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleTagInput();
+    }
   });
-}
 
-// --- Stream loading ---
-let videos = [];
-const yesSelections = new Set();
-const noSelections = new Set();
+  input.addEventListener("change", handleTagInput);
 
-try {
-  const playlistId = await getChannelDetails();
-  videos = await getVideosFromPlaylist(playlistId);
-  renderStreams(videos, list, yesSelections, noSelections);
-  submit.disabled = true; // stays disabled until tag entered
-} catch (err) {
-  console.error("Error loading videos:", err);
-}
+  function showTagBanner(tagName) {
+    const tagBanner = document.getElementById("tagBanner");
+    const tagBannerText = document.getElementById("tagBannerText");
+    const changeBtn = document.getElementById("changeTagBtn");
 
-// --- Submit handler ---
-submit.addEventListener("click", async () => {
-  const tagName = input.value.trim();
-  if (!tagName) {
-    alert("Please enter a tag name first!");
-    return;
+    tagBannerText.textContent = `Tagging "${tagName}"`;
+    tagBanner.classList.remove("hidden");
+
+    changeBtn.onclick = () => {
+      input.disabled = false;
+      input.focus();
+      input.classList.remove("filled");
+      tagBanner.classList.add("hidden");
+    };
   }
 
-  // ===== Build CSV header =====
-  const header = [
-    "stream_link",
-    ...existingTags,   // all existing tags
-    tagName,           // new suggested tag
-    "zatsu_start",
-    "stream_title"
-  ];
-  const rows = [header.join(",")];
-
-  // Build a map for fast metadata lookup by video ID
-  const metadataMap = {};
-  for (let i = 1; i < metadataRows.length; i++) {
-    const row = metadataRows[i];
-    metadataMap[row[0]] = row; // key = video ID
+  // --- Search filter ---
+  if (searchBox) {
+    searchBox.addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase();
+      document.querySelectorAll(".stream-item").forEach((item) => {
+        const title = item.querySelector("span").textContent.toLowerCase();
+        item.style.display = title.includes(query) ? "" : "none";
+      });
+    });
   }
 
-  // Merge playlist videos with metadata rows
-  for (const v of videos) {
-    const id = v.id;                         // ID only
-    const metaRow = metadataMap[id] || [];
-    const title = v.title.replace(/"/g, '""');
+  // --- Stream loading ---
+  let videos = [];
+  const yesSelections = new Set();
+  const noSelections = new Set();
 
-    // Get existing tag values
-    const existingTagValues = existingTags.map((_, idx) =>
-      metaRow[idx + 1] || ""                 // tag columns start at index 1
-    );
+  try {
+    const playlistId = await getChannelDetails();
+    videos = await getVideosFromPlaylist(playlistId);
+    renderStreams(videos, list, yesSelections, noSelections);
+    submit.disabled = true;
+  } catch (err) {
+    console.error("Error loading videos:", err);
+  }
 
-    // Suggested tag:
-    let newTagValue = "";
-    if (yesSelections.has(id)) newTagValue = "1";
-    else if (noSelections.has(id)) newTagValue = "0";
+  // --- Submit handler ---
+  submit.addEventListener("click", async () => {
+    const tagName = input.value.trim();
+    if (!tagName) {
+      alert("Please enter a tag name first!");
+      return;
+    }
 
-    // zatsu_start is at second-to-last position:
-    const zatsu = metaRow[existingTags.length + 1] || "";
-
-    const row = [
-      id,                       // stream_link (ID only)
-      ...existingTagValues,     // existing tags
-      newTagValue,              // suggested tag
-      zatsu,                    // zatsu_start
-      `"${title}"`              // stream title
+    // Build header
+    const header = [
+      "stream_link",
+      ...existingTags,
+      tagName,
+      "zatsu_start",
+      "stream_title"
     ];
+    const rows = [header.join(",")];
 
-    rows.push(row.join(","));
-  }
+    // Build lookup map
+    const metadataMap = {};
+    for (let i = 1; i < metadataRows.length; i++) {
+      const row = metadataRows[i];
+      metadataMap[row[0]] = row;
+    }
 
+    // Merge playlist videos with metadata
+    for (const v of videos) {
+      const id = v.id;
+      const metaRow = metadataMap[id] || [];
+
+      const existingTagValues = existingTags.map((_, idx) =>
+        metaRow[idx + 1] || ""
+      );
+
+      let newTagValue = "";
+      if (yesSelections.has(id)) newTagValue = "1";
+      else if (noSelections.has(id)) newTagValue = "0";
+
+      const zatsu = metaRow[existingTags.length + 1] || "";
+      const title = v.title.replace(/"/g, '""');
+
+      rows.push([
+        id,
+        ...existingTagValues,
+        newTagValue,
+        zatsu,
+        `"${title}"`
+      ].join(","));
+    }
 
     const csvText = rows.join("\n");
 
-      // ===== Email via EmailJS =====
-      try {
-        const response = await emailjs.send(
-          "service_wk26mhd",
-          "template_6eyzp4i",
-          {
-            tag_name: tagName,
-            csv_text: csvText
-          }
-        );
+    // Send email
+    try {
+      const response = await emailjs.send(
+        "service_wk26mhd",
+        "template_6eyzp4i",
+        { tag_name: tagName, csv_text: csvText }
+      );
 
       console.log("EmailJS response:", response);
       alert(`📨 Suggestion sent! Thank you for helping to improve Cuudex.`);
@@ -182,7 +205,7 @@ submit.addEventListener("click", async () => {
   });
 }
 
-// ---- Helper: Render video list ----
+// ---- Render video list ----
 function renderStreams(videos, container, yesSelections, noSelections) {
   container.innerHTML = "";
 
@@ -200,7 +223,6 @@ function renderStreams(videos, container, yesSelections, noSelections) {
     container.appendChild(item);
   }
 
-  // --- Selection handlers ---
   container.addEventListener("click", (e) => {
     const item = e.target.closest(".stream-item");
     if (!item) return;
@@ -213,7 +235,9 @@ function renderStreams(videos, container, yesSelections, noSelections) {
       item.classList.remove("no");
       e.target.classList.add("selected");
       e.target.nextElementSibling.classList.remove("selected");
-    } else if (e.target.classList.contains("btn-no")) {
+    }
+
+    else if (e.target.classList.contains("btn-no")) {
       const id = e.target.dataset.id;
       noSelections.add(id);
       yesSelections.delete(id);
@@ -224,28 +248,3 @@ function renderStreams(videos, container, yesSelections, noSelections) {
     }
   });
 }
-
-// ---- Simple CSV parser----
-function parseCSV(csv) {
-  return csv
-    .trim()
-    .split("\n")
-    .map(line => {
-      let parts = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g);
-      if (!parts) return [];
-
-      // Remove LAST column (stream_title)
-      parts.pop();
-
-      parts = parts.map(p => {
-        p = p.trim();
-        if (p.startsWith('"') && p.endsWith('"')) {
-          return p.slice(1, -1).replace(/""/g, '"');
-        }
-        return p;
-      });
-
-      return parts;
-    });
-}
-
