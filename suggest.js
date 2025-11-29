@@ -29,18 +29,12 @@ async function initSuggest() {
     metadataRows = parseCSV(csvText);
 
     const header = metadataRows[0]; // first row
-    existingTags = header.slice(2); // skip stream_link + zatsu_start
-
-    // Remove stream_title if present at the end
-    const last = existingTags[existingTags.length - 1];
-    if (last && last.toLowerCase().includes("title")) {
-      existingTags.pop();
-    }
+    existingTags = header.slice(1, -2); // everything after stream_link up to before zatsu_start and stream_title
 
     console.log("Loaded existing tags:", existingTags);
   } catch (err) {
     console.error("Failed to load metadata.csv", err);
-    alert("⚠️ Could not load metadata.csv — suggestion cannot be sent.");
+    alert("⚠️ Could not load stream data — suggestion cannot be sent.");
     return;
   }
 
@@ -69,95 +63,102 @@ input.addEventListener("keydown", (e) => {
 input.addEventListener("change", handleTagInput);
 
 
-  function showTagBanner(tagName) {
-    const tagBanner = document.getElementById("tagBanner");
-    const tagBannerText = document.getElementById("tagBannerText");
-    const changeBtn = document.getElementById("changeTagBtn");
+function showTagBanner(tagName) {
+  const tagBanner = document.getElementById("tagBanner");
+  const tagBannerText = document.getElementById("tagBannerText");
+  const changeBtn = document.getElementById("changeTagBtn");
 
-    tagBannerText.textContent = `Tagging "${tagName}"`;
-    tagBanner.classList.remove("hidden");
+  tagBannerText.textContent = `Tagging "${tagName}"`;
+  tagBanner.classList.remove("hidden");
 
-    changeBtn.onclick = () => {
-      input.disabled = false;
-      input.focus();
-      input.classList.remove("filled");
-      tagBanner.classList.add("hidden");
-    };
-  }
+  changeBtn.onclick = () => {
+    input.disabled = false;
+    input.focus();
+    input.classList.remove("filled");
+    tagBanner.classList.add("hidden");
+  };
+}
 
-  // --- Search filter ---
-  if (searchBox) {
-    searchBox.addEventListener("input", (e) => {
-      const query = e.target.value.toLowerCase();
-      document.querySelectorAll(".stream-item").forEach((item) => {
-        const title = item.querySelector("span").textContent.toLowerCase();
-        item.style.display = title.includes(query) ? "" : "none";
-      });
+// --- Search filter ---
+if (searchBox) {
+  searchBox.addEventListener("input", (e) => {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll(".stream-item").forEach((item) => {
+      const title = item.querySelector("span").textContent.toLowerCase();
+      item.style.display = title.includes(query) ? "" : "none";
     });
+  });
+}
+
+// --- Stream loading ---
+let videos = [];
+const yesSelections = new Set();
+const noSelections = new Set();
+
+try {
+  const playlistId = await getChannelDetails();
+  videos = await getVideosFromPlaylist(playlistId);
+  renderStreams(videos, list, yesSelections, noSelections);
+  submit.disabled = true; // stays disabled until tag entered
+} catch (err) {
+  console.error("Error loading videos:", err);
+}
+
+// --- Submit handler ---
+submit.addEventListener("click", async () => {
+  const tagName = input.value.trim();
+  if (!tagName) {
+    alert("Please enter a tag name first!");
+    return;
   }
 
-  // --- Stream loading ---
-  let videos = [];
-  const yesSelections = new Set();
-  const noSelections = new Set();
+  // ===== Build CSV header =====
+  const header = [
+    "stream_link",
+    ...existingTags,   // all existing tags
+    tagName,           // new suggested tag
+    "zatsu_start",
+    "stream_title"
+  ];
+  const rows = [header.join(",")];
 
-  try {
-    const playlistId = await getChannelDetails();
-    videos = await getVideosFromPlaylist(playlistId);
-    renderStreams(videos, list, yesSelections, noSelections);
-    submit.disabled = true; // stays disabled until tag entered
-  } catch (err) {
-    console.error("Error loading videos:", err);
+  // Build a map for fast metadata lookup by video ID
+  const metadataMap = {};
+  for (let i = 1; i < metadataRows.length; i++) {
+    const row = metadataRows[i];
+    metadataMap[row[0]] = row; // key = video ID
   }
 
-  // --- Submit handler ---
-  submit.addEventListener("click", async () => {
-    const tagName = input.value.trim();
-    if (!tagName) {
-      alert("Please enter a tag name first!");
-      return;
-    }
+  // Merge playlist videos with metadata rows
+  for (const v of videos) {
+    const id = v.id;                         // ID only
+    const metaRow = metadataMap[id] || [];
+    const title = v.title.replace(/"/g, '""');
 
-    // ===== Build CSV header =====
-    const header = [
-      "stream_link",
-      "zatsu_start",
-      ...existingTags,
-      tagName,
-      "stream_title"
+    // Get existing tag values
+    const existingTagValues = existingTags.map((_, idx) =>
+      metaRow[idx + 1] || ""                 // tag columns start at index 1
+    );
+
+    // Suggested tag:
+    let newTagValue = "";
+    if (yesSelections.has(id)) newTagValue = "1";
+    else if (noSelections.has(id)) newTagValue = "0";
+
+    // zatsu_start is at second-to-last position:
+    const zatsu = metaRow[existingTags.length + 1] || "";
+
+    const row = [
+      id,                       // stream_link (ID only)
+      ...existingTagValues,     // existing tags
+      newTagValue,              // suggested tag
+      zatsu,                    // zatsu_start
+      `"${title}"`              // stream title
     ];
-    const rows = [header.join(",")];
 
-    // Build a map for fast metadata lookup by stream link
-    const metadataMap = {};
-    for (let i = 1; i < metadataRows.length; i++) {
-      const row = metadataRows[i];
-      metadataMap[row[0]] = row; // key: stream_link
-    }
+    rows.push(row.join(","));
+  }
 
-    // Merge videos from playlist with metadata
-    for (const v of videos) {
-      const link = `https://www.youtube.com/watch?v=${v.id}`;
-      const title = v.title.replace(/"/g, '""');
-      const metaRow = metadataMap[link] || [];
-
-      // Existing tags preserved
-      const existingTagValues = existingTags.map((_, idx) => metaRow[idx + 2] || "");
-
-      let newTagValue = "";
-      if (yesSelections.has(v.id)) newTagValue = "1";
-      else if (noSelections.has(v.id)) newTagValue = "0";
-
-      const row = [
-        metaRow[0] || link,     // stream_link
-        metaRow[1] || "",       // zatsu_start
-        ...existingTagValues,   // existing tags
-        newTagValue,            // suggested tag
-        `"${title}"`            // stream title
-      ];
-
-      rows.push(row.join(","));
-    }
 
     const csvText = rows.join("\n");
 
@@ -224,10 +225,27 @@ function renderStreams(videos, container, yesSelections, noSelections) {
   });
 }
 
-// ---- Simple CSV parser helper ----
-function parseCSV(csvText) {
-  return csvText
+// ---- Simple CSV parser----
+function parseCSV(csv) {
+  return csv
     .trim()
     .split("\n")
-    .map((line) => line.split(","));
+    .map(line => {
+      let parts = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g);
+      if (!parts) return [];
+
+      // Remove LAST column (stream_title)
+      parts.pop();
+
+      parts = parts.map(p => {
+        p = p.trim();
+        if (p.startsWith('"') && p.endsWith('"')) {
+          return p.slice(1, -1).replace(/""/g, '"');
+        }
+        return p;
+      });
+
+      return parts;
+    });
 }
+
