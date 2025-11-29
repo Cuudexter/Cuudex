@@ -44,21 +44,30 @@ async function initSuggest() {
     return;
   }
 
-  // --- Tag input behavior ---
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const value = input.value.trim();
-      if (value) {
-        chosenTag = value;
-        input.blur();
-        input.classList.add("filled");
-        input.disabled = true;
-        showTagBanner(chosenTag);
-        submit.disabled = false;
-      }
-    }
-  });
+// --- Tag input behavior (desktop + mobile-friendly) ---
+function handleTagInput() {
+  const value = input.value.trim();
+  if (!value) return;
+
+  chosenTag = value;
+  input.blur();
+  input.classList.add("filled");
+  input.disabled = true;
+  showTagBanner(chosenTag);
+  submit.disabled = false;
+}
+
+// Trigger when user presses Enter (desktop)
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleTagInput();
+  }
+});
+
+// Also trigger when input loses focus or "Done" on mobile
+input.addEventListener("change", handleTagInput);
+
 
   function showTagBanner(tagName) {
     const tagBanner = document.getElementById("tagBanner");
