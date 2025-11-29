@@ -1266,3 +1266,53 @@ select {
   transition: max-height 0.25s ease, opacity 0.25s ease;
   overflow: hidden;
 }
+
+
+/* ============================================
+   TRUE INVISIBLE HITBOX EXPANSION
+   Does not move slider or change layout
+   ============================================ */
+
+/* WebKit (Chrome, Safari) */
+input[type="range"]::-webkit-slider-thumb {
+  position: relative;
+  z-index: 1;
+}
+
+input[type="range"]::-webkit-slider-thumb::before {
+  content: "";
+  position: absolute;
+  pointer-events: auto;       /* Needed for iOS */
+  
+  /* Invisible hitbox expansion */
+  top: -18px;                 /* ↑ only upward */
+  bottom: -6px;               /* very small downward */
+  left: -14px;
+  right: -14px;
+
+  background: transparent;
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-thumb {
+  position: relative;
+  z-index: 1;
+}
+
+input[type="range"]::-moz-range-thumb::before {
+  content: "";
+  position: absolute;
+  pointer-events: auto;
+
+  top: -18px;
+  bottom: -6px;
+  left: -14px;
+  right: -14px;
+
+  background: transparent;
+}
+
+/* Prevent Firefox outline shrinking hitbox */
+input[type="range"]::-moz-focus-outer {
+  border: 0;
+}
