@@ -70,10 +70,6 @@
 }
 
 #changelog-box ul {
-    margin-top: 0.2em;
-    margin-bottom: 0.2em;
-}
-
-#changelog-box li {
-    margin: 0.1em 0; 
+    margin-top: 0;
+    margin-bottom: 0;
 }
