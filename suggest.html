@@ -52,6 +52,31 @@
     <button id="submitTag" disabled>Submit Tag</button>
   </main>
 
+<div id="submitModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Additional Info (Optional)</h2>
+    <label>
+      Comment (max 250 characters)
+      <input id="modalMessage" type="text" maxlength="250" placeholder="Your comment..."/>
+    </label>
+    <label>
+      Discord username (I might have tag questions!)
+      <input id="modalDiscord" type="text" placeholder="Discord username"/>
+    </label>
+    <label>
+      <input id="modalCredit" type="checkbox"/> Credit me for this tag
+    </label>
+    <label id="modalCreditNameLabel" style="display:none">
+      Credit name
+      <input id="modalCreditName" type="text" placeholder="Your name"/>
+    </label>
+    <div class="modal-buttons">
+      <button id="modalCancel">Cancel</button>
+      <button id="modalSubmit">Submit</button>
+    </div>
+  </div>
+</div>
+
 <!-- EmailJS SDK FIRST -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 

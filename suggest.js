@@ -107,53 +107,92 @@ if (searchBox) {
   // --- Render streams using main page style ---
   renderStreams(videos, list, yesSelections, noSelections);
 
-  // --- Submit handler ---
-  submit.addEventListener("click", async () => {
-    if (!metadataLoaded) {
-      alert("Cannot submit suggestion because metadata failed to load.");
-      return;
-    }
+  // --- Modal elements ---
+  const modal = document.getElementById("submitModal");
+  const modalMessage = document.getElementById("modalMessage");
+  const modalDiscord = document.getElementById("modalDiscord");
+  const modalCredit = document.getElementById("modalCredit");
+  const modalCreditName = document.getElementById("modalCreditName");
+  const modalCreditLabel = document.getElementById("modalCreditNameLabel");
+  const modalCancel = document.getElementById("modalCancel");
+  const modalSubmit = document.getElementById("modalSubmit");
 
-    const tagName = input.value.trim();
-    if (!tagName) {
-      alert("Please enter a tag name first!");
-      return;
-    }
-
-    const header = ["stream_link", ...existingTags, tagName, "zatsu_start", "stream_title"];
-    const rows = [header.join(",")];
-
-    const metadataMap = {};
-    for (let i = 1; i < metadataRows.length; i++) {
-      const row = metadataRows[i];
-      metadataMap[row[0]] = row;
-    }
-
-    for (const v of videos) {
-      const id = v.id;
-      const metaRow = metadataMap[id] || [];
-      const title = v.title.replace(/"/g, '""');
-      const existingTagValues = existingTags.map((_, idx) => metaRow[idx + 1] || "");
-      let newTagValue = "";
-      if (yesSelections.has(id)) newTagValue = "1";
-      else if (noSelections.has(id)) newTagValue = "0";
-      const zatsu = metaRow[existingTags.length + 1] || "";
-      rows.push([id, ...existingTagValues, newTagValue, zatsu, `"${title}"`].join(","));
-    }
-
-    try {
-      const response = await emailjs.send(
-        "service_wk26mhd",
-        "template_6eyzp4i",
-        { tag_name: tagName, csv_text: rows.join("\n") }
-      );
-      console.log("EmailJS response:", response);
-      alert(`📨 Suggestion sent! Thank you for helping to improve Cuudex.`);
-    } catch (error) {
-      console.error("EmailJS error:", error);
-      alert("❌ Failed to send suggestion. Please try again later.");
-    }
+  // Toggle credit name input
+  modalCredit.addEventListener("change", () => {
+    modalCreditLabel.style.display = modalCredit.checked ? "block" : "none";
   });
+
+  // Cancel modal
+  modalCancel.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+
+  // --- Submit handler ---
+submit.addEventListener("click", (e) => {
+  if (!metadataLoaded) {
+    alert("Cannot submit suggestion because metadata failed to load.");
+    return;
+  }
+  if (!input.value.trim()) {
+    alert("Please enter a tag name first!");
+    return;
+  }
+
+  // Reset modal fields
+  modalMessage.value = "";
+  modalDiscord.value = "";
+  modalCredit.checked = false;
+  modalCreditName.value = "";
+  modalCreditLabel.style.display = "none";
+
+  // Show modal
+  modal.classList.remove("hidden");
+});
+
+modalSubmit.addEventListener("click", async () => {
+  const tagName = input.value.trim();
+  const message = modalMessage.value.trim();
+  const discordUser = modalDiscord.value.trim();
+  const credit = modalCredit.checked;
+  const creditName = credit ? modalCreditName.value.trim() : "";
+
+  const header = ["stream_link", ...existingTags, tagName, "zatsu_start", "stream_title"];
+  const rows = [header.join(",")];
+  const metadataMap = {};
+  for (let i = 1; i < metadataRows.length; i++) {
+    const row = metadataRows[i];
+    metadataMap[row[0]] = row;
+  }
+  for (const v of videos) {
+    const id = v.id;
+    const metaRow = metadataMap[id] || [];
+    const title = v.title.replace(/"/g, '""');
+    const existingTagValues = existingTags.map((_, idx) => metaRow[idx + 1] || "");
+    let newTagValue = "";
+    if (yesSelections.has(id)) newTagValue = "1";
+    else if (noSelections.has(id)) newTagValue = "0";
+    const zatsu = metaRow[existingTags.length + 1] || "";
+    rows.push([id, ...existingTagValues, newTagValue, zatsu, `"${title}"`].join(","));
+  }
+
+  try {
+    await emailjs.send("service_wk26mhd","template_6eyzp4i",{
+      tag_name: tagName,
+      csv_text: rows.join("\n"),
+      message,
+      discord_user: discordUser,
+      credit,
+      credit_name: creditName
+    });
+    alert("📨 Suggestion sent! Thank you for helping to improve Cuudex.");
+    modal.classList.add("hidden");
+  } catch (err) {
+    console.error(err);
+    alert("❌ Failed to send suggestion. Please try again later.");
+  }
+});
+
 
   // --- Render streams function ---
   function renderStreams(videos, container, yesSelections, noSelections) {
