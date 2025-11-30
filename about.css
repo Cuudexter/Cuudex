@@ -39,32 +39,3 @@
         grid-template-columns: 1fr;
     }
 }
-
-/* Changelog markdown spacing */
-#changelog-box h1,
-#changelog-box h2,
-#changelog-box h3 {
-    margin-top: 0;     
-    margin-bottom: 0; 
-    line-height: 1.2;
-}
-
-/* Largest heading (#) */
-#changelog-box h1 {
-    font-size: 1.5rem; 
-}
-
-/* Medium heading (##) */
-#changelog-box h2 {
-    font-size: 1.2rem;
-}
-
-/* Smallest heading (###) */
-#changelog-box h3 {
-    font-size: 1.05rem;
-}
-
-#changelog-box ul {
-    margin-top: -16px;
-    margin-bottom: 0;
-}
