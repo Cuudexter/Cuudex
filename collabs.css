@@ -52,51 +52,6 @@ body.collab-page .header-actions {
   border-color: #888;
 }
 
-/* Video Grid */
-
-#video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 15px;
-  padding: 2rem;
-  padding-top: 0;
-}
-
-.video-card {
-  background: #111;
-  border: 1px solid #222;
-  border-radius: 10px;
-  overflow: hidden;
-  transition: transform 0.15s, border-color 0.15s;
-}
-
-.video-card:hover {
-  transform: translateY(-3px);
-  border-color: #444;
-}
-
-.video-card img {
-  width: 100%;
-  display: block;
-}
-
-.video-info {
-  padding: 10px;
-}
-
-.video-info h3 {
-  font-size: 0.9rem;
-  margin: 0 0 6px;
-  color: #eee;
-}
-
-.video-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: #aaa;
-}
-
 /* Slider Containers  */
 
 .slider-container,
