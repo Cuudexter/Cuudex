@@ -27,15 +27,8 @@
 
 /* Scrollable changelog viewer */
 #changelog-box {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: #111;
-    border-radius: 8px;
     max-height: 70vh;
     overflow-y: auto;
-    font-family: Consolas, monospace;
-    color: var(--muted);
-    white-space: pre-wrap;
 }
 
 /* Responsive stacking on small screens */
@@ -70,6 +63,6 @@
 }
 
 #changelog-box ul {
-    margin-top: -8px;
+    margin-top: -16px;
     margin-bottom: 0;
 }
