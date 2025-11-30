@@ -646,9 +646,9 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   appearance: none;
   position: absolute;
   width: 100%;
-  height: 40px;            /* taller for touch */
-  top: 50%;
-  transform: translateY(-50%); /* keep thumb visually centered over track */
+  height: 30px;               /* taller for touch */
+  top: 50%;                   /* center relative to track */
+  transform: translateY(-100%) translateY(-2px); /* center vertically */
   background: transparent;
   z-index: 1;
   pointer-events: auto;
@@ -663,11 +663,13 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   background: var(--teal);
   border: 2px solid #111;
   cursor: pointer;
-  transform: rotate(45deg);
   border-radius: 0;
   box-sizing: border-box;
   position: relative;
   z-index: 2;
+
+  /* Rotate and adjust positions of the thumbs visually */
+  transform: rotate(45deg) translateY(11px) translateX(10px);
 }
 
 /* Increase touchable area upward only for WebKit/iOS */
@@ -675,8 +677,8 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   content: "";
   position: absolute;
   pointer-events: auto;
-  top: -18px;      /* ↑ expand upward */
-  bottom: 0;       /* no expansion downward */
+  top: -20px;    /* ↑ expand upward for easier touch */
+  bottom: 0;     /* do not expand downward, so buttons below are unaffected */
   left: -14px;
   right: -14px;
   background: transparent;
@@ -689,11 +691,13 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   background: var(--teal);
   border: 2px solid #111;
   cursor: pointer;
-  transform: rotate(45deg);
   border-radius: 0;
   box-sizing: border-box;
   position: relative;
   z-index: 2;
+
+  /* Rotate and adjust positions of the thumbs visually */
+  transform: rotate(45deg) translateY(10.5px) translateX(9px);
 }
 
 /* Expand touchable area upward only for Firefox */
@@ -701,8 +705,8 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   content: "";
   position: absolute;
   pointer-events: auto;
-  top: -18px;   /* ↑ expand upward */
-  bottom: 0;    /* do not expand downward */
+  top: -20px;   /* ↑ expand upward */
+  bottom: 0;    /* no downward expansion */
   left: -14px;
   right: -14px;
   background: transparent;
