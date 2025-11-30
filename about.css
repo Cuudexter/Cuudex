@@ -12,7 +12,7 @@
 .about-left {
     background: var(--card);
     padding: 1.5rem;
-    border-radius: 12px;
+    border-radius: 2px;
     line-height: 1.6;
 }
 
@@ -20,16 +20,17 @@
 .about-right {
     background: var(--card);
     padding: 1.5rem;
-    border-radius: 12px;
+    border-radius: 2px;      
     display: flex;
     flex-direction: column;
 }
 
 /* Scrollable changelog viewer */
 #changelog-box {
-    max-height: 70vh;
-    overflow-y: auto;
+    flex: 1;                  
+    overflow-y: auto; 
 }
+
 
 /* Responsive stacking on small screens */
 @media (max-width: 800px) {
