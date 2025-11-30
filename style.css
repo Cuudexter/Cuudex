@@ -646,12 +646,14 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   appearance: none;
   position: absolute;
   width: 100%;
-  height: 30px;               /* taller for touch */
+  height: 22px;               /* taller for touch */
   top: 50%;                   /* center relative to track */
-  transform: translateY(-100%) translateY(-2px); /* center vertically */
+  transform: translateY(-100%); 
   background: transparent;
   z-index: 1;
   pointer-events: auto;
+  padding: 12px 0; /* iOS-only touch expansion */
+  S-webkit-tap-highlight-color: transparent;
 }
 
 /* WebKit thumbs */
@@ -669,7 +671,7 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   z-index: 2;
 
   /* Rotate and adjust positions of the thumbs visually */
-  transform: rotate(45deg) translateY(11px) translateX(10px);
+  transform: rotate(45deg) translateY(6px) translateX(8px);
 }
 
 /* Increase touchable area upward only for WebKit/iOS */
@@ -695,9 +697,10 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   box-sizing: border-box;
   position: relative;
   z-index: 2;
+  margin-top: -12px; /* iOS-only touch expansion */
 
   /* Rotate and adjust positions of the thumbs visually */
-  transform: rotate(45deg) translateY(10.5px) translateX(9px);
+  transform: rotate(45deg) translateY(6px) translateX(8px);
 }
 
 /* Expand touchable area upward only for Firefox */
