@@ -1,0 +1,46 @@
+/* Two-column card layout */
+.about-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 2rem;
+    width: 100%;
+    flex: 1;
+}
+
+/* Left text section */
+.about-left {
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 12px;
+    line-height: 1.6;
+}
+
+/* Right changelog section */
+.about-right {
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Scrollable changelog viewer */
+#changelog-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #111;
+    border-radius: 8px;
+    max-height: 70vh;
+    overflow-y: auto;
+    font-family: Consolas, monospace;
+    color: var(--muted);
+    white-space: pre-wrap;
+}
+
+/* Responsive stacking on small screens */
+@media (max-width: 800px) {
+    .about-layout {
+        grid-template-columns: 1fr;
+    }
+}
