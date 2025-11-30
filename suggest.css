@@ -1,111 +1,43 @@
-/* ==== General Page Layout ==== */
-body {
-  background-color: #121212;
-  color: #eee;
-  font-family: "Inter", sans-serif;
-  margin: 0;
-  padding: 0;
+/* ===== Suggest Page Header Layout  ===== */
+.top-header.suggest-header {
+  padding: 1.5rem 2rem;
+  display: block;       
+  position: relative;   
 }
 
-/* ==== Return Link ==== */
-#returnLink {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  color: #ccc;
-  text-decoration: none;
-  font-size: 0.95rem;
-  transition: color 0.2s;
-  z-index: 10;
-}
-#returnLink:hover {
-  color: #fff;
+/* Title */
+.top-header.suggest-header h1,
+.top-header.suggest-header h2 {
+  margin: 0 0 0.5rem 0;
 }
 
-/* ==== Tag Banner ==== */
-#tagBanner {
-  position: fixed;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(68, 68, 68, 0.9);
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+/* Center wrapper for tag label + input */
+.tag-input-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0; 
+}
+
+/* Header right-side actions */
+.nav-slant-btn {
+  position: absolute;
+  top: 1.5rem; 
+  right: 2rem; 
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  z-index: 9;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-#tagBanner.hidden {
-  display: none;
 }
 
-#changeTagBtn {
-  background: #333;
-  border: none;
-  color: #ddd;
-  border-radius: 6px;
-  padding: 0.3rem 0.7rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: background 0.2s, color 0.2s;
-}
-#changeTagBtn:hover {
-  background: #555;
-  color: #fff;
-}
-
-/* ==== Suggest Page ==== */
-.suggest-page {
-  max-width: 900px;
-  margin: 4rem auto 2rem;
-  padding: 1rem 2rem;
-  text-align: center;
-}
-
-.suggest-page h2 {
-  font-size: 1.6rem;
-  margin-bottom: 0.5rem;
-  color: #fff;
-}
-
-.suggest-page p {
-  color: #aaa;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-}
-
-/* ==== Tag Input ==== */
-#tagNameInput {
-  width: 220px;
-  padding: 0.4rem 0.6rem;
-  margin-bottom: 0.8rem;
-  border-radius: 6px;
-  border: 1px solid #555;
-  background: #222;
-  color: #fff;
-  font-size: 1rem;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-#tagNameInput:focus {
-  outline: none;
-  border-color: #00cc66;
-  background: #1a1a1a;
-}
-
-#tagNameInput.filled {
-  border-color: #00cc66;
-  background: #1c1c1c;
-}
 
 /* ==== Search Bar ==== */
 .search-container {
   margin-top: 1.2rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
-
 #searchStreams {
   width: 60%;
   max-width: 380px;
@@ -117,97 +49,128 @@ body {
   font-size: 0.95rem;
   transition: border-color 0.2s;
 }
-
 #searchStreams:focus {
   outline: none;
   border-color: #00cc66;
 }
 
-/* ==== Stream Grid ==== */
-#streamList {
-  margin-top: 1.8rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
-  justify-content: center;
+
+
+/* ==== General Page Layout ==== */
+body {
+  background-color: #121212;
+  color: #eee;
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0 1rem;
 }
 
-/* ==== Stream Card ==== */
+@media (min-width: 700px) {
+  .suggest-page,
+  #video-grid {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+#video-grid {
+  padding-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.video-info {
+  padding-bottom: 0;
+}
+
+
+
+/* STREAM ITEM — cleaned, unified */
 .stream-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   border: 1px solid #444;
-  padding: 0.8rem;
+  padding: 0.5rem;
   border-radius: 8px;
   background: #1c1c1c;
   transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 100%;
   max-width: 280px;
-  margin: 0 auto;
+  margin: 0 auto 0.8rem;
+  overflow: hidden;
 }
-
 .stream-item:hover {
   transform: translateY(-2px);
 }
 
-.stream-item img {
-  width: 100%;
-  max-width: 240px;
-  height: 135px;
-  object-fit: cover;
-  border-radius: 6px;
-  margin-bottom: 0.6rem;
+.stream-item h3 {
+  font-size: 0.95rem;
+  margin: 0 0 0.2rem 0;
+  line-height: 1.2;
 }
 
-.stream-item span {
-  color: #ddd;
-  font-size: 0.9rem;
-  margin-bottom: 0.4rem;
-  line-height: 1.3;
+.stream-item .video-meta {
+  font-size: 0.85rem;
+  color: #ccc;
+  margin: 0 0 0.2rem 0;
+  line-height: 1.2;
 }
+
+/* THUMBNAIL — fixed + consistent  */
+.stream-item img,
+.thumb-link img,
+.thumb-link {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+}
+
+
 
 /* ==== Yes/No Buttons ==== */
 .buttons {
   display: flex;
-  justify-content: center;
-  gap: 0.8rem;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin: 0.2rem 0 0.2rem 0;
 }
 
 .btn-yes,
 .btn-no {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   cursor: pointer;
   border: none;
   background: none;
   color: #999;
   transition: transform 0.1s, color 0.2s;
 }
-
 .btn-yes:hover {
   color: #00cc66;
 }
-
 .btn-no:hover {
   color: #cc3333;
 }
-
 .btn-yes.selected {
   color: #00cc66;
   transform: scale(1.2);
 }
-
 .btn-no.selected {
   color: #cc3333;
   transform: scale(1.2);
 }
 
-/* ==== Visual Feedback for Selection ==== */
+/* ==== Selection Feedback ==== */
 .stream-item.yes {
   background-color: rgba(0, 204, 102, 0.15);
   border-color: #00cc66;
 }
-
 .stream-item.no {
   background-color: rgba(204, 51, 51, 0.15);
   border-color: #cc3333;
@@ -225,71 +188,73 @@ body {
   font-size: 1rem;
   transition: background-color 0.2s, transform 0.2s;
 }
-
 #submitTag:hover:not(:disabled) {
   background-color: #00cc66;
   transform: translateY(-2px);
 }
-
 #submitTag:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* ==== Responsive Tweaks ==== */
-@media (max-width: 700px) {
-  #tagNameInput,
-  #searchStreams {
-    width: 70%;
-    max-width: none;
-  }
 
-  .suggest-page {
-    padding: 1rem;
-    margin: 3rem auto 2rem;
-  }
 
-  .stream-item img {
-    height: auto; /* preserve aspect ratio on narrow screens */
-  }
-}
-
+/* ==== Responsive tweaks ==== */
 @media (max-width: 480px) {
   #tagNameInput,
   #searchStreams {
     width: 90%;
   }
-
   .stream-item {
     max-width: 100%;
-    padding: 0.6rem;
   }
-
-  .stream-item img {
-    max-width: 100%;
-    height: auto;
-  }
-
   .buttons {
-    gap: 0.5rem;
-  }
-
-  .btn-yes,
-  .btn-no {
-    font-size: 1.2rem;
-  }
-
-  #submitTag {
-    width: 90%;
+    gap: 0.4rem;
   }
 }
 
-
-/* ===== HEADER ===== */
-.top-header {
+/* TAG BANNER (Top-Locked, Hidden by Default) */
+#tagBanner {
+  position: fixed;
+  top: 1.5rem;             
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(68, 68, 68, 0.95);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1.5rem 2rem;
-  flex-wrap: wrap;
+  gap: 0.8rem;
+  z-index: 20;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  font-size: 0.95rem;
+  display: none;          
+}
+
+/* Banner visible when JS removes .hidden */
+#tagBanner:not(.hidden) {
+  display: flex;
+}
+
+/* Change Tag button inside banner */
+#changeTagBtn {
+  background: #333;
+  border: none;
+  color: #ddd;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+#changeTagBtn:hover {
+  background: #555;
+  color: #fff;
+}
+
+/* Hide original Change Tag button if present elsewhere */
+.top-header.suggest-header #changeTagBtn {
+  display: none;
 }

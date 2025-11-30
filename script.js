@@ -5,12 +5,58 @@ const TWITTER_USERNAME = "FeileacanCu";
 
 // ==== UTILITIES ====
 
+// ==== PAGE TYPE DETECTION ====
 if (document.body.classList.contains("collab-page")) {
   window.IS_COLLAB_PAGE = true;
   window.collapseStage = 0;   // 🔥 Always forced to expanded
 } else {
   window.IS_COLLAB_PAGE = false;
 }
+
+// ==== CONDITIONAL GLOBAL STREAM DATA ====
+window.allStreams = []; // always defined, but only populated for main/suggest pages
+window.fetchAllStreams = async function() {
+  if (window.allStreams.length) return window.allStreams;
+
+  if (window.IS_COLLAB_PAGE) {
+    console.log("[fetchAllStreams] Collab page detected — skipping video fetch");
+    return [];
+  }
+
+  try {
+    const playlistId = await getChannelDetails();
+    if (!playlistId) return [];
+
+    const tagMap = loadStreamTags();
+    const fetched = await getVideosFromPlaylist(playlistId);
+
+    const streams = fetched.map(s => {
+      const tags = tagMap[s.id] || {};
+      const zatsuStart = tags.zatsuStartMinutes || 0;
+      const total = s.durationMinutes || 0;
+
+      const d = new Date(s.date);
+      const options = { month: 'long', day: 'numeric' };
+      const formattedDate = d.toLocaleDateString('en-GB', options) + " '" + String(d.getFullYear()).slice(-2);
+
+      return {
+        ...s,
+        tags,
+        zatsuStartMinutes: zatsuStart,
+        zatsuDuration: Math.max(0, total - zatsuStart),
+        gameDuration: Math.max(0, zatsuStart),
+        formattedDate,
+      };
+    });
+
+    window.allStreams = streams;
+    return streams;
+  } catch (err) {
+    console.error("[fetchAllStreams] Error fetching videos:", err);
+    return [];
+  }
+};
+
 
 let sortOrder = "newest"; // 🌍 GLOBAL sort order
 

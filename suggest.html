@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Suggest a Tag — Cuudex</title>
+  <title>Suggest a Tag - Cuudex</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="suggest.css" />
 </head>
@@ -11,8 +11,13 @@
 
   <!-- Navigation back to main page -->
 <header class="top-header suggest-header">
+  <h1>Suggest a Tag</h1>
+
+    <!-- Tag input -->
+    <label for="tagNameInput" class="visually-hidden">Tag Name</label>
+    <input id="tagNameInput" type="text" placeholder="Enter new tag name..." />
 <nav class="header-actions">
-  <a href="index.html" class="nav-slant-btn"><span>← Return to Cuudex</span></a>
+  <a href="index.html" class="nav-slant-btn"><span>Return to Cuudex</span></a>
 </nav>
 </header>
 
@@ -24,24 +29,24 @@
   </div>
 
   <main class="suggest-page">
-    <h2>Suggest a Tag</h2>
+    
     <p>
       Thank you for your input — these filters help cater Cuu to others! 
+      If you would like, you can be credited for your tag suggestion.
       Your suggestion will be manually screened to prevent trolling. 
       Please double-check your tag spelling before submitting.
-    </p>
 
-    <!-- Tag input -->
-    <label for="tagNameInput" class="visually-hidden">Tag Name</label>
-    <input id="tagNameInput" type="text" placeholder="Enter new tag name..." />
+      New tag suggestions must apply to at least 2 streams. Untagged streams will count as a No. 
+      Submit at the bottom of the page.
+    </p>
 
     <!-- Search streams -->
     <div class="search-container">
-      <input id="searchStreams" type="text" placeholder="Search streams by title..." />
+      <input id="searchStreams" type="text" placeholder="Search streams by title or date..." />
     </div>
 
     <!-- Streams list -->
-    <div id="streamList" class="stream-list"></div>
+    <div id="video-grid"></div>
 
     <!-- Submit button -->
     <button id="submitTag" disabled>Submit Tag</button>
@@ -59,11 +64,8 @@
   });
 </script>
 
-<!-- NOW load your scripts AFTER EmailJS is defined -->
 <script src="script.js" defer></script>
 <script src="suggest.js" defer></script>
-
-
 
 </body>
 </html>
