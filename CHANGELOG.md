@@ -13,5 +13,4 @@ All notable changes to Cuudex will be shown here.
 ## [1.0.0] - 2025-11-30
  
 ### Added
-
 - Cuudex came into existence.
