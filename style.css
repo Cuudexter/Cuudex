@@ -635,59 +635,68 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   outline: none;
 }
 
-
-
-
-
-
-
-
-
 /* ============================================
    TRUE INVISIBLE HITBOX EXPANSION
-   Does not move slider or change layout
+   Works on iPhone + desktop, visually identical
    ============================================ */
 
-/* WebKit (Chrome, Safari) */
-input[type="range"]::-webkit-slider-thumb {
-  position: relative;
-  z-index: 1;
-}
-
-input[type="range"]::-webkit-slider-thumb::before {
-  content: "";
+/* Make the actual input taller for easier touch */
+#durationSliderContainer input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
   position: absolute;
-  pointer-events: auto;       /* Needed for iOS */
-  
-  /* Invisible hitbox expansion */
-  top: -18px;                 /* ↑ only upward */
-  bottom: -6px;               /* very small downward */
-  left: -14px;
-  right: -14px;
-
+  width: 100%;
+  height: 40px;            /* taller for touch */
+  top: 50%;
+  transform: translateY(-50%); /* keep thumb centered over track */
   background: transparent;
-}
-
-/* Firefox */
-input[type="range"]::-moz-range-thumb {
-  position: relative;
   z-index: 1;
+  pointer-events: auto;
 }
 
-input[type="range"]::-moz-range-thumb::before {
+/* WebKit thumbs */
+#durationSliderContainer input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--teal);
+  border: 2px solid #111;
+  cursor: pointer;
+  transform: rotate(45deg);
+  border-radius: 0;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+}
+
+/* Firefox thumbs */
+#durationSliderContainer input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--teal);
+  border: 2px solid #111;
+  cursor: pointer;
+  transform: rotate(45deg);
+  border-radius: 0;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+}
+
+/* Optional: invisible pseudo-element for extra hit area (Firefox mostly) */
+#durationSliderContainer input[type="range"]::-moz-range-thumb::before {
   content: "";
   position: absolute;
   pointer-events: auto;
-
   top: -18px;
-  bottom: -6px;
-  left: -14px;
-  right: -14px;
-
+  bottom: -18px;
+  left: -18px;
+  right: -18px;
   background: transparent;
 }
 
 /* Prevent Firefox outline shrinking hitbox */
-input[type="range"]::-moz-focus-outer {
+#durationSliderContainer input[type="range"]::-moz-focus-outer {
   border: 0;
 }
