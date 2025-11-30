@@ -636,8 +636,8 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
 }
 
 /* ============================================
-   TRUE INVISIBLE HITBOX EXPANSION
-   Works on iPhone + desktop, visually identical
+   MOBILE-FRIENDLY TOUCH SLIDER (iOS safe)
+   Thumb hitbox expands upward only, buttons below unaffected
    ============================================ */
 
 /* Make the actual input taller for easier touch */
@@ -648,7 +648,7 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   width: 100%;
   height: 40px;            /* taller for touch */
   top: 50%;
-  transform: translateY(-50%); /* keep thumb centered over track */
+  transform: translateY(-50%); /* keep thumb visually centered over track */
   background: transparent;
   z-index: 1;
   pointer-events: auto;
@@ -670,6 +670,18 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   z-index: 2;
 }
 
+/* Increase touchable area upward only for WebKit/iOS */
+#durationSliderContainer input[type="range"]::-webkit-slider-thumb::before {
+  content: "";
+  position: absolute;
+  pointer-events: auto;
+  top: -18px;      /* ↑ expand upward */
+  bottom: 0;       /* no expansion downward */
+  left: -14px;
+  right: -14px;
+  background: transparent;
+}
+
 /* Firefox thumbs */
 #durationSliderContainer input[type="range"]::-moz-range-thumb {
   width: 12px;
@@ -684,15 +696,15 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   z-index: 2;
 }
 
-/* Optional: invisible pseudo-element for extra hit area (Firefox mostly) */
+/* Expand touchable area upward only for Firefox */
 #durationSliderContainer input[type="range"]::-moz-range-thumb::before {
   content: "";
   position: absolute;
   pointer-events: auto;
-  top: -18px;
-  bottom: -18px;
-  left: -18px;
-  right: -18px;
+  top: -18px;   /* ↑ expand upward */
+  bottom: 0;    /* do not expand downward */
+  left: -14px;
+  right: -14px;
   background: transparent;
 }
 
