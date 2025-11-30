@@ -52,27 +52,30 @@
     <button id="submitTag" disabled>Submit Tag</button>
   </main>
 
-<div id="submitModal" class="modal hidden">
+<!-- Submit Modal -->
+<div id="submitModal" class="hidden">
+  <div class="modal-overlay"></div>
   <div class="modal-content">
-    <h2>Additional Info (Optional)</h2>
-    <label>
-      Comment (max 250 characters)
-      <input id="modalMessage" type="text" maxlength="250" placeholder="Your comment..."/>
+    <h2>Optional submission info</h2>
+    <label for="modalMessage">Comment (max 250 characters)</label>
+    <textarea id="modalMessage" maxlength="250" placeholder="Your comment..."></textarea>
+
+    <label for="modalDiscord">Discord username (for tag or comment questions!)</label>
+    <input type="text" id="modalDiscord" placeholder="Discord username">
+
+    <div class="credit-container">
+      <input type="checkbox" id="modalCredit">
+      <label for="modalCredit">Credit me if my tag is used</label>
+    </div>
+
+    <label for="modalCreditName" id="modalCreditNameLabel" style="display:none;">
+      Credit Name
+      <input type="text" id="modalCreditName" placeholder="How you want to be credited">
     </label>
-    <label>
-      Discord username (I might have tag questions!)
-      <input id="modalDiscord" type="text" placeholder="Discord username"/>
-    </label>
-    <label>
-      <input id="modalCredit" type="checkbox"/> Credit me for this tag
-    </label>
-    <label id="modalCreditNameLabel" style="display:none">
-      Credit name
-      <input id="modalCreditName" type="text" placeholder="Your name"/>
-    </label>
+
     <div class="modal-buttons">
-      <button id="modalCancel">Cancel</button>
-      <button id="modalSubmit">Submit</button>
+      <button id="modalCancel" class="red-btn">Cancel</button>
+      <button id="modalSubmit" class="green-btn">Submit</button>
     </div>
   </div>
 </div>

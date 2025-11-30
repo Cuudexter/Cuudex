@@ -178,40 +178,61 @@ body {
 
 /* ==== Submit Button ==== */
 #submitTag {
-  margin-top: 2rem;
-  padding: 0.7rem 1.4rem;
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 2rem auto;
+  padding: 0.9rem 0;
   border-radius: 8px;
-  background: #333;
-  color: #fff;
+  font-size: 1.1rem;
+  font-weight: bold;
   border: none;
   cursor: pointer;
-  font-size: 1rem;
   transition: background-color 0.2s, transform 0.2s;
+  text-align: center;
 }
-#submitTag:hover:not(:disabled) {
+
+/* Enabled = green, disabled = red */
+#submitTag:enabled {
   background-color: #00cc66;
+  color: #121212;
+}
+#submitTag:enabled:hover {
+  background-color: #00e076;
   transform: translateY(-2px);
 }
+
 #submitTag:disabled {
-  opacity: 0.4;
+  background-color: #cc3333;
+  color: #fff;
   cursor: not-allowed;
 }
 
-
-
-/* ==== Responsive tweaks ==== */
-@media (max-width: 480px) {
-  #tagNameInput,
-  #searchStreams {
-    width: 90%;
-  }
-  .stream-item {
-    max-width: 100%;
-  }
-  .buttons {
-    gap: 0.4rem;
-  }
+/* Tag input normal */
+#tagNameInput {
+  width: 220px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
+  font-size: 1rem;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.3s;
 }
+
+/* When empty and required (no tag entered) */
+#tagNameInput.missing-tag {
+  border-color: #cc3333;       /* red border */
+  box-shadow: 0 0 8px rgba(204,51,51,0.5); /* glow effect */
+  animation: pulseRed 1.5s infinite;
+}
+
+/* Subtle pulsing animation for attention */
+@keyframes pulseRed {
+  0%, 100% { box-shadow: 0 0 8px rgba(204,51,51,0.5); }
+  50% { box-shadow: 0 0 12px rgba(204,51,51,0.3); }
+}
+
 
 /* TAG BANNER (Top-Locked, Hidden by Default) */
 #tagBanner {
@@ -260,43 +281,120 @@ body {
 }
 
 /* Submission info */
-.modal {
+/* Modal overlay */
+#submitModal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 9999;
 }
-.modal.hidden {
+
+#submitModal.hidden {
   display: none;
 }
-.modal-content {
+
+#submitModal .modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+}
+
+/* Modal content box */
+#submitModal .modal-content {
+  position: relative;
   background: #1c1c1c;
-  color: #eee;
   padding: 2rem;
-  border-radius: 8px;
-  max-width: 400px;
+  border-radius: 12px;
   width: 90%;
+  max-width: 480px;
+  color: #eee;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 1rem;
 }
-.modal-content input[type=text] {
+
+/* Textarea for comment */
+#modalMessage {
+  width: 100%;
+  min-height: 5rem;        /* larger for visibility */
+  max-height: 10rem;       /* prevent huge modal */
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+/* Input fields */
+#modalDiscord, #modalCreditName {
   width: 100%;
   padding: 0.4rem 0.6rem;
   border-radius: 6px;
   border: 1px solid #555;
   background: #222;
   color: #fff;
+  font-size: 0.95rem;
 }
+
+/* Credit toggle container */
+.credit-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Modal buttons */
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
 }
+
+.modal-buttons button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+}
+
+/* Green submit button */
+.green-btn {
+  background-color: #00cc66;
+  color: #121212;
+}
+.green-btn:hover {
+  background-color: #00e076;
+  transform: translateY(-2px);
+}
+
+/* Red cancel button */
+.red-btn {
+  background-color: #cc3333;
+  color: #fff;
+}
+.red-btn:hover {
+  background-color: #ff4d4d;
+  transform: translateY(-2px);
+}
+
+/* Responsive tweak for small screens */
+@media (max-width: 480px) {
+  #submitModal .modal-content {
+    padding: 1.5rem;
+  }
+}
+
 
