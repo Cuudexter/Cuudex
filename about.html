@@ -55,30 +55,29 @@
 
     <!-- RIGHT SIDE CHANGELOG -->
     <section class="about-right">
-        <h2>Changelog</h2>
-        <pre id="changelog-box">Loading CHANGELOG.md…</pre>
+        <div id="changelog-box" class="changelog"></div>
     </section>
-
 </main>
-
+<!-- Markdown parser -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 (function() {
     const box = document.getElementById("changelog-box");
 
-    // Default empty state so the page renders correctly
-    box.textContent = "";
-
     fetch("CHANGELOG.md")
         .then(r => r.ok ? r.text() : "")
         .then(txt => {
-            box.textContent = txt || "";  // Empty, but does not error
+            if (!txt) {
+                box.textContent = "";
+                return;
+            }
+            // Convert markdown → HTML
+            box.innerHTML = marked.parse(txt);
         })
         .catch(() => {
-            // Completely silent — page will not break
+            box.textContent = ""; // stay silent
         });
 })();
 </script>
-
-
 </body>
 </html>
