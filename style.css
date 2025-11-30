@@ -371,8 +371,8 @@ select {
   -webkit-appearance: none;
   appearance: none;
   pointer-events: all;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: var(--teal);
   border: 2px solid #111;
   cursor: pointer;
@@ -383,8 +383,8 @@ select {
 
 #durationSliderContainer input[type="range"]::-moz-range-thumb {
   pointer-events: all;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: var(--teal);
   border: 2px solid #111;
   cursor: pointer;
@@ -565,8 +565,6 @@ select {
   gap: 0.5rem;
 }
 
-
-
 /* tag container allows wrapping - note COLLABS */
 #tag-filters {
   display: flex;
@@ -635,87 +633,4 @@ body:not(.index-page) .header-actions .nav-slant-btn:focus {
   outline: none;
 }
 
-/* ============================================
-   MOBILE-FRIENDLY TOUCH SLIDER (iOS safe)
-   Thumb hitbox expands upward only, buttons below unaffected
-   ============================================ */
 
-/* Make the actual input taller for easier touch */
-#durationSliderContainer input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  position: absolute;
-  width: 100%;
-  height: 22px;               /* taller for touch */
-  top: 50%;                   /* center relative to track */
-  transform: translateY(-100%); 
-  background: transparent;
-  z-index: 1;
-  pointer-events: auto;
-  padding: 12px 0; /* iOS-only touch expansion */
-  S-webkit-tap-highlight-color: transparent;
-}
-
-/* WebKit thumbs */
-#durationSliderContainer input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  background: var(--teal);
-  border: 2px solid #111;
-  cursor: pointer;
-  border-radius: 0;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 2;
-
-  /* Rotate and adjust positions of the thumbs visually */
-  transform: rotate(45deg) translateY(6px) translateX(8px);
-}
-
-/* Increase touchable area upward only for WebKit/iOS */
-#durationSliderContainer input[type="range"]::-webkit-slider-thumb::before {
-  content: "";
-  position: absolute;
-  pointer-events: auto;
-  top: -20px;    /* ↑ expand upward for easier touch */
-  bottom: 0;     /* do not expand downward, so buttons below are unaffected */
-  left: -14px;
-  right: -14px;
-  background: transparent;
-}
-
-/* Firefox thumbs */
-#durationSliderContainer input[type="range"]::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  background: var(--teal);
-  border: 2px solid #111;
-  cursor: pointer;
-  border-radius: 0;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 2;
-  margin-top: -12px; /* iOS-only touch expansion */
-
-  /* Rotate and adjust positions of the thumbs visually */
-  transform: rotate(45deg) translateY(6px) translateX(8px);
-}
-
-/* Expand touchable area upward only for Firefox */
-#durationSliderContainer input[type="range"]::-moz-range-thumb::before {
-  content: "";
-  position: absolute;
-  pointer-events: auto;
-  top: -20px;   /* ↑ expand upward */
-  bottom: 0;    /* no downward expansion */
-  left: -14px;
-  right: -14px;
-  background: transparent;
-}
-
-/* Prevent Firefox outline shrinking hitbox */
-#durationSliderContainer input[type="range"]::-moz-focus-outer {
-  border: 0;
-}
