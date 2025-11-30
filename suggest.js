@@ -55,17 +55,25 @@ videos = await window.fetchAllStreams();
   const noSelections = new Set();
 
   // --- Tag input behavior ---
-  function handleTagInput() {
-    const value = input.value.trim();
-    if (!value) return;
-
-    chosenTag = value;
-    input.disabled = true;
-    input.classList.add("filled");
-    showTagBanner(chosenTag);
-
-    if (metadataLoaded) submit.disabled = false;
+function handleTagInput() {
+  const value = input.value.trim();
+  
+  if (!value) {
+    chosenTag = "";
+    submit.disabled = true;
+    input.classList.add("missing-tag"); // highlight empty
+    return;
   }
+
+  chosenTag = value;
+  input.disabled = true;
+  input.classList.remove("missing-tag"); // remove highlight
+  input.classList.add("filled");
+  showTagBanner(chosenTag);
+
+  if (metadataLoaded) submit.disabled = false;
+}
+
 
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -73,6 +81,7 @@ videos = await window.fetchAllStreams();
       handleTagInput();
     }
   });
+
   input.addEventListener("change", handleTagInput);
 
   function showTagBanner(tagName) {
