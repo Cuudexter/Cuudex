@@ -1,35 +1,36 @@
-/* Two-column card layout */
 .about-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
     padding: 2rem;
     width: 100%;
-    flex: 1;
+    align-items: stretch; /* ensure equal-height columns */
 }
 
-/* Left text section */
+/* Left card */
 .about-left {
     background: var(--card);
     padding: 1.5rem;
-    border-radius: 2px;
+    border-radius: 4px;
     line-height: 1.6;
 }
 
-/* Right changelog section */
+/* Right card */
 .about-right {
     background: var(--card);
     padding: 1.5rem;
-    border-radius: 2px;      
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
 }
 
-/* Scrollable changelog viewer */
+/* Scrollable changelog inside right card */
 #changelog-box {
-    flex: 1;                  
-    overflow-y: auto; 
+    flex: 1;          /* fills available height in card */
+    overflow-y: auto;
+    padding: 0;        /* optional, card padding already exists */
 }
+
 
 
 /* Responsive stacking on small screens */
