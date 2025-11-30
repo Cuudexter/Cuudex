@@ -10,17 +10,17 @@
 <body>
 
   <!-- Navigation back to main page -->
-<header class="top-header suggest-header">
-  <h1>Suggest a Tag</h1>
+  <header class="top-header suggest-header">
+    <h1>Suggest a Tag</h1>
 
     <!-- Tag input -->
     <label for="tagNameInput" class="visually-hidden"></label>
     <input id="tagNameInput" type="text" placeholder="Enter new tag name..." required />
-<nav class="header-actions">
-  <a href="index.html" class="nav-slant-btn"><span>Return to Cuudex</span></a>
-</nav>
-</header>
 
+    <nav class="header-actions">
+      <a href="index.html" class="nav-slant-btn"><span>Return to Cuudex</span></a>
+    </nav>
+  </header>
 
   <!-- Tag info banner (hidden by default) -->
   <div id="tagBanner" class="hidden" aria-live="polite">
@@ -29,7 +29,6 @@
   </div>
 
   <main class="suggest-page">
-    
     <p>
       Thank you for your input — these filters help cater Cuu to others! 
       If you would like, you can be credited for your tag suggestion.
@@ -52,48 +51,49 @@
     <button id="submitTag" disabled>Submit Tag</button>
   </main>
 
-<!-- Submit Modal -->
-<div id="submitModal" class="hidden">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <h2>Optional submission info</h2>
-    <label for="modalMessage">Comment (max 250 characters)</label>
-    <textarea id="modalMessage" maxlength="250" placeholder="Your comment..."></textarea>
+  <!-- Submit Modal -->
+  <div id="submitModal" class="hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <h2>Optional submission info</h2>
 
-    <label for="modalDiscord">Discord username (for tag or comment questions!)</label>
-    <input type="text" id="modalDiscord" placeholder="Discord username" maxlength="25">
+      <label for="modalMessage">Comment (max 250 characters)</label>
+      <textarea id="modalMessage" maxlength="250" placeholder="Your comment..."></textarea>
 
-    <div class="credit-container">
-      <input type="checkbox" id="modalCredit">
-      <label for="modalCredit">Credit me if my tag is used</label>
-    </div>
+      <label for="modalDiscord">Discord username (for tag or comment questions!)</label>
+      <input type="text" id="modalDiscord" placeholder="Discord username" maxlength="25">
 
-    <label for="modalCreditName" id="modalCreditNameLabel" style="display:none;">
-      Credit Name
-      <input type="text" id="modalCreditName" placeholder="Your name of choice" maxlength="25">
-    </label>
+      <div class="credit-container">
+        <input type="checkbox" id="modalCredit">
+        <label for="modalCredit">Credit me if my tag is used</label>
+      </div>
 
-    <div class="modal-buttons">
-      <button id="modalCancel" class="red-btn">Cancel</button>
-      <button id="modalSubmit" class="green-btn">Submit</button>
+      <label for="modalCreditName" id="modalCreditNameLabel" style="display:none;">
+        Credit Name
+        <input type="text" id="modalCreditName" placeholder="Your name of choice" maxlength="25">
+      </label>
+
+      <div class="modal-buttons">
+        <button id="modalCancel" class="red-btn">Cancel</button>
+        <button id="modalSubmit" class="green-btn">Submit</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- EmailJS SDK FIRST -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <!-- EmailJS SDK FIRST -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
-<!-- Initialize EmailJS BEFORE loading your scripts -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    console.log("Initializing EmailJS...");
-    emailjs.init("B9sxlT369XvaI9NAp");
-    console.log("EmailJS ready:", typeof emailjs);
-  });
-</script>
+  <!-- Initialize EmailJS BEFORE loading your scripts -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      console.log("Initializing EmailJS...");
+      emailjs.init("B9sxlT369XvaI9NAp");
+      console.log("EmailJS ready:", typeof emailjs);
+    });
+  </script>
 
-<script src="script.js" defer></script>
-<script src="suggest.js" defer></script>
+  <script src="script.js" defer></script>
+  <script src="suggest.js" defer></script>
 
 </body>
 </html>

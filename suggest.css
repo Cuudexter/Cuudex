@@ -54,8 +54,6 @@
   border-color: #00cc66;
 }
 
-
-
 /* ==== General Page Layout ==== */
 body {
   background-color: #121212;
@@ -63,14 +61,6 @@ body {
   font-family: "Inter", sans-serif;
   margin: 0;
   padding: 0 1rem;
-}
-
-@media (min-width: 700px) {
-  .suggest-page,
-  #video-grid {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
 }
 
 #video-grid {
@@ -84,9 +74,7 @@ body {
   padding-bottom: 0;
 }
 
-
-
-/* STREAM ITEM — cleaned, unified */
+/* Stream Items */
 .stream-item {
   display: flex;
   flex-direction: column;
@@ -131,8 +119,6 @@ body {
   border-radius: 6px;
   margin-bottom: 0.4rem;
 }
-
-
 
 /* ==== Yes/No Buttons ==== */
 .buttons {
@@ -226,7 +212,6 @@ body {
   animation: pulseRed 1.5s infinite;
 }
 
-
 /* TAG BANNER (Top-Locked, Hidden by Default) */
 #tagBanner {
   position: fixed;
@@ -274,6 +259,7 @@ body {
 }
 
 /* Submission info */
+
 /* Modal overlay */
 #submitModal {
   position: fixed;
@@ -318,8 +304,8 @@ body {
 /* Textarea for comment */
 #modalMessage {
   width: 100%;
-  min-height: 5rem;        /* larger for visibility */
-  max-height: 10rem;       /* prevent huge modal */
+  min-height: 5rem;  
+  max-height: 10rem; 
   padding: 0.5rem;
   border-radius: 6px;
   border: 1px solid #555;
