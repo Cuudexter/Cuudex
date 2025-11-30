@@ -220,17 +220,10 @@ body {
   transition: background 0.2s, border-color 0.2s, box-shadow 0.3s;
 }
 
-/* When empty and required (no tag entered) */
-#tagNameInput.missing-tag {
-  border-color: #cc3333;       /* red border */
-  box-shadow: 0 0 8px rgba(204,51,51,0.5); /* glow effect */
+#tagNameInput:invalid {
+  border-color: #cc3333;
+  box-shadow: 0 0 8px rgba(204,51,51,0.5);
   animation: pulseRed 1.5s infinite;
-}
-
-/* Subtle pulsing animation for attention */
-@keyframes pulseRed {
-  0%, 100% { box-shadow: 0 0 8px rgba(204,51,51,0.5); }
-  50% { box-shadow: 0 0 12px rgba(204,51,51,0.3); }
 }
 
 

@@ -138,16 +138,7 @@ if (searchBox) {
 
 
   // --- Submit handler ---
-submit.addEventListener("click", (e) => {
-  if (!metadataLoaded) {
-    alert("Cannot submit suggestion because metadata failed to load.");
-    return;
-  }
-  if (!input.value.trim()) {
-    alert("Please enter a tag name first!");
-    return;
-  }
-
+submit.addEventListener("click", () => {
   // Reset modal fields
   modalMessage.value = "";
   modalDiscord.value = "";
