@@ -330,7 +330,7 @@ function updateFill(minV, maxV) {
 // ==== STREAM DISPLAY & FILTERING ====
 
 let allStreams = [];
-let currentDurationType = "full"; // global single source of truth
+let currentDurationType = "full";
 
 function displayStreams(streams) {
   const grid = document.getElementById("video-grid");
@@ -345,7 +345,7 @@ function displayStreams(streams) {
     const isTagged = s.tags && Object.keys(s.tags).some(k => k && k !== "stream_link" && k !== "zatsu_start");
     const untaggedLabel = !isTagged ? `<span class="untagged-label">Untagged</span>` : "";
 
-    // Use currentDurationType for displayed duration if you want; we'll show full by default in card
+    // Use currentDurationType for displayed duration
     const displayedDuration = s.durationMinutes || 0;
 
     return `
@@ -483,11 +483,6 @@ createTagButtons(tagNames);
   ro.observe(tagFilters);
 })();
 
-
-
-
-
-
     allStreams = fetched.map(s => {
       const tags = tagMap[s.id] || {};
       const zatsuStart = tags.zatsuStartMinutes || 0;
@@ -551,7 +546,7 @@ createTagButtons(tagNames);
         modeButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
 
-        // set global mode
+        // Set global mode
         currentDurationType = btn.dataset.mode || "full";
 
         // Recompute the max for this mode
@@ -569,17 +564,17 @@ createTagButtons(tagNames);
         const maxLbl = document.getElementById("durationMaxLabel");
 
         if (minEl && maxEl) {
-          // update max attributes
+          // Update max attributes
           minEl.max = maxForMode;
           maxEl.max = maxForMode;
 
-          // clamp values if necessary
+          // Clamp values if necessary
           if (parseInt(maxEl.value) > maxForMode) maxEl.value = maxForMode;
           if (parseInt(minEl.value) >= parseInt(maxEl.value)) {
             minEl.value = Math.max(0, parseInt(maxEl.value) - 1);
           }
 
-          // recalc fill & labels
+          // Recalculate fill & labels
           const sliderMin = parseFloat(minEl.min);
           const sliderMax = parseFloat(maxEl.max);
           const range = Math.max(1, sliderMax - sliderMin);
@@ -663,9 +658,6 @@ function applyTagCollapseState() {
 // Initialize collapse stage properly on load
 collapseStage = 0; // ensure starts expanded
 applyTagCollapseState(); // render initial state
-
-
-
 
 let collapseClickedOnce = false;
 
