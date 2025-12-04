@@ -1,9 +1,70 @@
 // ==== CONFIG ====
-const API_KEY = "AIzaSyD4P5R5ESGIeMbBsWFC37OBM6t_MKMJXQA";
 const CHANNEL_ID = "UCwkVDkOudIxhYMG61Jv8Tww";
 const TWITTER_USERNAME = "FeileacanCu";
 
 // ==== UTILITIES ====
+
+
+
+// ==== MULTI-KEY API ROTATION ====
+const API_KEYS = [
+  "AIzaSyD4P5R5ESGIeMbBsWFC37OBM6t_MKMJXQA",
+  "AIzaSyDpEVMya4rDw9-9_xYDukQ4PU6O9L4cSyM",
+  "AIzaSyAM6m4JaArIczVC355uyQcLcnOJqmBYq80",
+  "AIzaSyAEhDnhnPUaxd70PIviv0-8pnlNwe44XQ4",
+  "AIzaSyCXs7M8F3974ERREsTh_M_5LtCYfxLe8uw"
+];
+
+let API_KEY_INDEX = 0;
+let API_KEY = API_KEYS[API_KEY_INDEX]; // global active key
+
+// Try the current key. If it fails, rotate and try again.
+async function ytFetch(url) {
+  for (let i = 0; i < API_KEYS.length; i++) {
+    API_KEY = API_KEYS[API_KEY_INDEX];
+
+    // Ensure tryUrl is always a string
+    let tryUrl;
+    if (typeof url === "string") {
+      tryUrl = url.includes("key=")
+        ? url.replace(/key=[^&]+/, "key=" + API_KEY)
+        : url + (url.includes("?") ? "&" : "?") + "key=" + API_KEY;
+    } else if (url instanceof URL) {
+      url.searchParams.set("key", API_KEY);
+      tryUrl = url.toString();
+    } else {
+      throw new Error("ytFetch received invalid url");
+    }
+
+    try {
+      const res = await fetch(tryUrl);
+
+      if (res.ok) {
+        const json = await res.json();
+
+        if (json.error?.errors?.[0]?.reason) {
+          const reason = json.error.errors[0].reason;
+          if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
+            throw new Error("quota");
+          }
+        }
+
+        return json; // success
+      }
+
+      throw new Error("fetch-failed");
+
+    } catch (err) {
+      console.warn(`API key failed (${err.message}). Rotating…`);
+
+      API_KEY_INDEX = (API_KEY_INDEX + 1) % API_KEYS.length;
+      API_KEY = API_KEYS[API_KEY_INDEX];
+    }
+  }
+
+  throw new Error("All API keys exhausted");
+}
+
 
 // ==== PAGE TYPE DETECTION ====
 if (document.body.classList.contains("collab-page")) {
@@ -14,47 +75,84 @@ if (document.body.classList.contains("collab-page")) {
 }
 
 // ==== CONDITIONAL GLOBAL STREAM DATA ====
-window.allStreams = []; // always defined, but only populated for main/suggest pages
+// Uses smart caching with playlist itemCount check
+window.allStreams = [];
+
 window.fetchAllStreams = async function() {
-  if (window.allStreams.length) return window.allStreams;
+    if (window.IS_COLLAB_PAGE) {
+        console.log("Collab page detected — skipping fetch");
+        return [];
+    }
 
-  if (window.IS_COLLAB_PAGE) {
-    console.log("[fetchAllStreams] Collab page detected — skipping video fetch");
-    return [];
+  // --- Read cache ---
+  const cachedStreams = JSON.parse(localStorage.getItem("allStreams") || "[]");
+  const cachedLatestId = cachedStreams[0]?.id || null;
+
+  if (cachedStreams.length > 0) {
+      const playlistId = await getChannelDetails();
+      if (!playlistId) return [];
+
+      // --- Fetch JUST the first upload (super low quota) ---
+      const latestUrl =
+          `https://www.googleapis.com/youtube/v3/playlistItems?` +
+          `part=contentDetails&playlistId=${playlistId}&maxResults=1&key=${API_KEY}`;
+
+      const latestJson = await ytFetch(latestUrl);
+
+      const liveLatestId = latestJson?.items?.[0]?.contentDetails?.videoId;
+
+      console.log("Cached latest stream:", cachedLatestId);
+      console.log("Live latest upload:", liveLatestId);
+
+      if (cachedLatestId === liveLatestId) {
+          console.log("✔ Cache is fresh — using cached streams");
+          window.allStreams = cachedStreams;
+          return cachedStreams;
+      }
+
+      console.log("⚠ New upload detected — refreshing stream list…");
   }
 
-  try {
-    const playlistId = await getChannelDetails();
-    if (!playlistId) return [];
 
-    const tagMap = loadStreamTags();
-    const fetched = await getVideosFromPlaylist(playlistId);
+    // --- Fetch full data  ---
+    try {
+        const playlistId = await getChannelDetails();
+        if (!playlistId) return [];
 
-    const streams = fetched.map(s => {
-      const tags = tagMap[s.id] || {};
-      const zatsuStart = tags.zatsuStartMinutes || 0;
-      const total = s.durationMinutes || 0;
+        const tagMap = loadStreamTags();
+        const fetched = await getVideosFromPlaylist(playlistId);
 
-      const d = new Date(s.date);
-      const options = { month: 'long', day: 'numeric' };
-      const formattedDate = d.toLocaleDateString('en-GB', options) + " '" + String(d.getFullYear()).slice(-2);
+        const streams = fetched.map(s => {
+            const tags = tagMap[s.id] || {};
+            const zatsuStart = tags.zatsuStartMinutes || 0;
+            const total = s.durationMinutes || 0;
 
-      return {
-        ...s,
-        tags,
-        zatsuStartMinutes: zatsuStart,
-        zatsuDuration: Math.max(0, total - zatsuStart),
-        gameDuration: Math.max(0, zatsuStart),
-        formattedDate,
-      };
-    });
+            const d = new Date(s.date);
+            const options = { month: "long", day: "numeric" };
+            const formattedDate = d.toLocaleDateString("en-GB", options) + " '" + String(d.getFullYear()).slice(-2);
 
-    window.allStreams = streams;
-    return streams;
-  } catch (err) {
-    console.error("[fetchAllStreams] Error fetching videos:", err);
-    return [];
-  }
+            return {
+                ...s,
+                tags,
+                zatsuStartMinutes: zatsuStart,
+                zatsuDuration: Math.max(0, total - zatsuStart),
+                gameDuration: Math.max(0, zatsuStart),
+                formattedDate,
+            };
+        });
+
+        // --- Store updated cache ---
+        window.allStreams = streams;
+        localStorage.setItem("allStreams", JSON.stringify(streams));
+        localStorage.setItem("allStreams_count", streams.length);
+
+        console.log("✔ Updated cache with", streams.length, "streams");
+
+        return streams;
+    } catch (err) {
+        console.error("[fetchAllStreams] Error fetching videos:", err);
+        return cachedStreams; // fallback if possible
+    }
 };
 
 
@@ -115,8 +213,7 @@ function escapeHtml(str) {
 // Fetch channel snippet and uploads playlist ID
 async function getChannelDetails() {
   const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const data = await ytFetch(url);
   if (!data.items?.length) return null;
 
   const channel = data.items[0].snippet;
@@ -149,8 +246,7 @@ async function getVideosFromPlaylist(playlistId) {
       key: API_KEY,
     }).toString();
 
-    const res = await fetch(url);
-    const data = await res.json();
+    const data = await ytFetch(url);
     if (!data.items) break;
 
     videos.push(...data.items);

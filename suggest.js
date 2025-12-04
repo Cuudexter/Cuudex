@@ -1,10 +1,8 @@
 // ==== suggest.js ====
 
 document.addEventListener("DOMContentLoaded", initSuggest);
-console.log("In suggest.js, emailjs is:", typeof emailjs);
 
 async function initSuggest() {
-  console.log("Suggest Tag page initializing...");
 
   // Core elements
   const input = document.getElementById("tagNameInput");
@@ -34,7 +32,6 @@ async function initSuggest() {
     existingTags = header.slice(1, -2); // skip stream_link and last 2 columns (zatsu_start, stream_title)
     metadataLoaded = true;
 
-    console.log("Loaded existing tags:", existingTags);
   } catch (err) {
     console.error("Could not load metadata.csv — submission disabled", err);
     metadataLoaded = false;
@@ -48,8 +45,21 @@ async function initSuggest() {
     submit.disabled = true;
   }
 
-  // --- Re-use main page videos ---
-videos = await window.fetchAllStreams();
+// --- Fetch or reuse main-page streams ---
+let videos = await fetchAllStreams();
+
+// Ensure cached streams have formattedDate (like main page)
+videos = videos.map(s => {
+  if (!s.formattedDate && s.date) {
+    const d = new Date(s.date);
+    const options = { month: 'long', day: 'numeric' };
+    s.formattedDate = d.toLocaleDateString('en-GB', options) + " '" + String(d.getFullYear()).slice(-2);
+  }
+  return s;
+});
+
+window.videos = videos;
+
 
   const yesSelections = new Set();
   const noSelections = new Set();
@@ -112,7 +122,6 @@ if (searchBox) {
   });
 }
 
-
   // --- Render streams using main page style ---
   renderStreams(videos, list, yesSelections, noSelections);
 
@@ -135,7 +144,6 @@ if (searchBox) {
   modalCancel.addEventListener("click", () => {
     modal.classList.add("hidden");
   });
-
 
   // --- Submit handler ---
 submit.addEventListener("click", () => {
@@ -194,34 +202,32 @@ modalSubmit.addEventListener("click", async () => {
 });
 
 
-  // --- Render streams function ---
-  function renderStreams(videos, container, yesSelections, noSelections) {
-    container.innerHTML = ""; // clear old content
+function renderStreams(videos, container, yesSelections, noSelections) {
+  container.innerHTML = ""; // clear old content
 
-    for (const v of videos) {
-      const card = document.createElement("div");
-      card.className = "video-card stream-item";
-
-      card.innerHTML = `
-        <a href="https://youtu.be/${v.id}" target="_blank" class="thumb-link">
-          <img src="${v.thumbnail}" alt="${v.title}" loading="lazy" />
-        </a>
-        <div class="video-info">
-          <h3 class="stream-title">${v.title}</h3>
-          <div class="video-meta">
-            <p class="video-date">${v.formattedDate || ""}</p>
-            <div class="buttons">
-              <button class="btn-yes" data-id="${v.id}">✅</button>
-              <button class="btn-no" data-id="${v.id}">❌</button>
-            </div>
+  for (const v of videos) {
+    const card = document.createElement("div");
+    card.className = "video-card stream-item";
+    card.innerHTML = `
+      <a href="https://youtu.be/${v.id}" target="_blank" class="thumb-link">
+        <img src="${v.thumbnail}" alt="${v.title}" loading="lazy" />
+      </a>
+      <div class="video-info">
+        <h3 class="stream-title">${v.title}</h3>
+        <div class="video-meta">
+          <p class="video-date">${v.formattedDate || ""}</p>
+          <div class="buttons">
+            <button class="btn-yes" data-id="${v.id}">✅</button>
+            <button class="btn-no" data-id="${v.id}">❌</button>
           </div>
         </div>
-      `;
+      </div>
+    `;
+    container.appendChild(card);
+  }
 
-      container.appendChild(card);
-    }
-
-    // --- Selection handlers ---
+  // Attach click handler **once**
+  if (!container.hasClickHandler) {
     container.addEventListener("click", (e) => {
       const item = e.target.closest(".stream-item");
       if (!item) return;
@@ -244,8 +250,9 @@ modalSubmit.addEventListener("click", async () => {
         e.target.previousElementSibling.classList.remove("selected");
       }
     });
+    container.hasClickHandler = true;
   }
-}
+}}
 
 // ---- CSV parser: handles quoted titles ----
 function parseCSV(csv) {
