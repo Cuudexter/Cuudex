@@ -13,6 +13,14 @@ All notable changes to Cuudex will be shown here.
 - Fix weird Tag button wrap on load
 - Add relevant mouseover info (tags?)
 
+## [1.2.1] - 2025-12-05
+
+### Added
+- Tagged today's stream
+
+### Fixed
+- Tag for <i>Oshiete Yo Cú-Sensei Episode 8</i>
+
 ## [1.2.0] - 2025-12-05
 
 ### Added
