@@ -4,6 +4,7 @@
   --muted: #bbb;
   --track: #333;
   --teal: #00eeff;
+  --pink: #f397e7;
 }
 
 /* Global box-sizing */
@@ -20,6 +21,15 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Fixed position, scroll bar or no */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  overflow-y: auto;
 }
 
 /* ===== HEADER ===== */
@@ -118,7 +128,8 @@ select {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 0.5fr));
   gap: 1.5rem;
-  padding: 2rem;
+  padding-left: 2rem;
+  padding-right: 1.5rem;
   padding-top: 0px;
   flex: 1;
   align-content: start;
@@ -183,19 +194,21 @@ select {
 }
 
 .tag-btn.include {
-  background: #00a2ff;
+  background: rgba(0, 162, 255, 0.8);
   border-color: #00a2ff;
   color: #fff;
   transform: skewX(-20deg);
 }
 
 .tag-btn.exclude {
-  background: #333;
-  border-color: #666;
-  color: #f397e7;
-  text-decoration: line-through;
-  opacity: 0.9;
+  background: repeating-linear-gradient(
+    to right,
+    #222 0 8px,
+    rgba(243, 151, 231, 0.3) 8px 16px
+  );
+  border-color: var(--pink);
 }
+
 
 /* Protecting tag button corners */
 .tag-section {
