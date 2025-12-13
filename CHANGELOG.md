@@ -11,7 +11,7 @@ All notable changes to Cuudex will be shown here.
 - Fix weird Tag button wrap on load
 - Add relevant mouseover info (tags?)
 
-## [1.3.2] - 2025-12-11
+## [1.3.2] - 2025-12-14
 
 ### Added
 - New Tag <i>Vod+</i> for edited vods
