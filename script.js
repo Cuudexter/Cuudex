@@ -350,24 +350,26 @@ function extractVideoId(value) {
 let tagStates = {}; // three-state per tag
 
 function createTagButtons(tagNames) {
-  const container = document.getElementById("tag-filters");
-  if (!container) return;
+const container = document.querySelector(".tag-section");
+if (!container) return;
 
-  // sort alphabetically to keep UI consistent
-  tagNames = [...tagNames].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+tagStates = {};
 
-  container.innerHTML = "";
-  tagStates = {};
+// Keep collapse button
+const collapseBtn = document.getElementById("collapseTagsBtn");
+container.innerHTML = ""; // wipes everything
+if (collapseBtn) container.appendChild(collapseBtn); // restore it
 
-  tagNames.forEach(tag => {
-    tagStates[tag] = "none";
-    const btn = document.createElement("button");
-    btn.className = "tag-btn";
-    btn.innerHTML = `<span>${tag}</span>`;
-    btn.addEventListener("click", () => cycleTagState(tag, btn));
-    updateTagButtonStyle(btn, "none");
-    container.appendChild(btn);
-  });
+tagNames.forEach(tag => {
+  tagStates[tag] = "none";
+  const btn = document.createElement("button");
+  btn.className = "tag-btn";
+  btn.innerHTML = `<span>${tag}</span>`;
+  btn.addEventListener("click", () => cycleTagState(tag, btn));
+  updateTagButtonStyle(btn, "none");
+
+  container.appendChild(btn);
+});
 }
 
 function cycleTagState(tag, btn) {
@@ -568,43 +570,11 @@ async function initMainPage() {
 
     const sample = Object.keys(Object.values(tagMap)[0] || {});
     const tagNames = sample.filter(t => !["stream_link","stream_title", "zatsu_start", "zatsuStartMinutes"].includes(t));
+    // Sort alphabetically
+    tagNames.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
     createTagButtons(tagNames);
 
 // ------------------------------
-// GLUE COLLAPSE BUTTON TO FIRST TAG WITHOUT AFFECTING BUTTON SHAPE
-(function glueCollapseToFirstTag() {
-  const section = document.querySelector(".tag-section");
-  const collapseBtn = document.getElementById("collapseTagsBtn");
-  const tagFilters = document.getElementById("tag-filters");
-  if (!section || !collapseBtn || !tagFilters) return;
-
-  // wrap collapse + first tag in inline-flex container
-  let firstRowWrapper = section.querySelector(".collapse-first-row");
-  if (!firstRowWrapper) {
-    firstRowWrapper = document.createElement("div");
-    firstRowWrapper.className = "collapse-first-row";
-    firstRowWrapper.style.display = "inline-flex";
-    firstRowWrapper.style.alignItems = "center";
-    firstRowWrapper.style.gap = "0.5rem";
-    section.insertBefore(firstRowWrapper, tagFilters);
-    firstRowWrapper.appendChild(collapseBtn);
-  }
-
-  // move first tag into firstRowWrapper
-  const moveFirstTag = () => {
-    const firstTag = tagFilters.querySelector(".tag-btn");
-    if (firstTag && firstTag.parentElement !== firstRowWrapper) {
-      firstRowWrapper.appendChild(firstTag);
-    }
-  };
-
-  moveFirstTag();
-
-  // Observe changes (optional, helps on zoom/layout shifts)
-  const ro = new ResizeObserver(() => requestAnimationFrame(moveFirstTag));
-  ro.observe(section);
-  ro.observe(tagFilters);
-})();
 
     allStreams = fetched.map(s => {
       const tags = tagMap[s.id] || {};
@@ -744,7 +714,7 @@ document.getElementById("suggestTagBtn")?.addEventListener("click", () => {
 
 // === TAG COLLAPSE TOGGLE (3-STAGE) ===
 const collapseBtn = document.getElementById("collapseTagsBtn");
-const tagFilterContainer = document.getElementById("tag-filters");
+const tagFilterContainer = document.querySelector(".tag-section");
 
 let collapseStage = 0; // 0 = all visible, 1 = only included/excluded shown, 2 = none shown
 
