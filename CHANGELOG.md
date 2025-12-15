@@ -10,6 +10,15 @@ All notable changes to Cuudex will be shown here.
 - Fix Suggest page text in general
 - Add relevant mouseover info (tags?)
 
+## [1.3.4] - 2025-12-15
+
+### Added
+- Visuals for <i>Supercut</i> VODs
+- Tags for recent stream
+
+### Changed
+- <i>Vod+</i> tag renamed <i>Supercut</i>
+
 ## [1.3.3] - 2025-12-14
 
 ### Fixed

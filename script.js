@@ -469,14 +469,24 @@ function displayStreams(streams) {
   }
 
   grid.innerHTML = streams.map(s => {
-    const isTagged = s.tags && Object.keys(s.tags).some(k => k && k !== "stream_link" && k !== "zatsu_start");
-    const untaggedLabel = !isTagged ? `<span class="untagged-label">Untagged</span>` : "";
+    const isTagged = s.tags && Object.keys(s.tags).some(
+      k => k && k !== "stream_link" && k !== "zatsu_start"
+    );
 
-    // Use currentDurationType for displayed duration
+    const isVodPlus = streamHasTagValue(s, "Supercut");
+
+    let statusLabel = "";
+
+    if (isVodPlus) {
+      statusLabel = `<span class="vodplus-label">Supercut</span>`;
+    } else if (!isTagged) {
+      statusLabel = `<span class="untagged-label">Untagged</span>`;
+    }
+
     const displayedDuration = s.durationMinutes || 0;
 
     return `
-      <div class="video-card">
+      <div class="video-card ${isVodPlus ? "vod-plus" : ""}">
         <a href="https://youtu.be/${s.id}" target="_blank" class="thumb-link">
           <img src="${s.thumbnail}" alt="${escapeHtml(s.title)}" loading="lazy" />
         </a>
@@ -484,13 +494,14 @@ function displayStreams(streams) {
           <h3>${escapeHtml(s.title)}</h3>
           <div class="video-meta">
             <p class="video-date">${s.formattedDate}</p>
-            ${untaggedLabel}
+            ${statusLabel}
             <p class="video-duration">${formatMinutesToHM(displayedDuration)}</p>
           </div>
         </div>
       </div>
     `;
   }).join("");
+
 }
 
 function streamHasTagValue(stream, tagName) {
