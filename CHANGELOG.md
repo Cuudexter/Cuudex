@@ -10,6 +10,38 @@ All notable changes to Cuudex will be shown here.
 - Fix Suggest page text in general
 - Add relevant mouseover info (tags?)
 
+## [1.3.10] - 2025-12-29
+
+### Added
+- ASMR RP collab with Roy
+
+## [1.3.9] - 2025-12-28
+
+### Added
+- Member streams + visuals, only manually added
+
+## [1.3.8] - 2025-12-24
+
+### Added
+- New requested tag <i>Only Cuu</i> for Zatsus, Specials and other game-less streams
+- Tagged latest (unnumbered *cough* 11th) <i>Oshiete</i> stream
+
+## [1.3.7] - 2025-12-22
+
+### Added
+- U-san's hiatus stream
+- Collab specific tag <i>Totsu</i>
+
+## [1.3.6] - 2025-12-21
+
+### Added
+- Tags for Edith Supercut
+
+## [1.3.5] - 2025-12-18
+
+### Added
+- Tags for recent stream
+
 ## [1.3.4] - 2025-12-15
 
 ### Added
