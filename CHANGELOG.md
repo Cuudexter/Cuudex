@@ -10,6 +10,11 @@ All notable changes to Cuudex will be shown here.
 - Fix Suggest page text in general
 - Add relevant mouseover info (tags?)
 
+## [1.3.30] - 2026-02-22
+
+### Added
+- Tags for Voice Zoo & member
+
 ## [1.3.29] - 2026-02-21
 
 ### Added
